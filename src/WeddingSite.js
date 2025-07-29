@@ -205,6 +205,11 @@ export default function WeddingSite() {
                     loading="lazy"
                 ></iframe>
               </div>
+              <p style={{textAlign: 'center', marginTop: '1rem'}}>
+                  <a href="https://open.spotify.com/playlist/1IW9C77E5NwUXJs6o4QplP?si=2d419aa3b9904e39&pt=ffc2fb22dfa606bf0d68cbcfcdcb825e" target="_blank" rel="noopener noreferrer">
+                      Open and collaborate on Spotify!
+                  </a>
+              </p>
             </section>
 
             <section id="registry" ref={sectionRefs.registry} className="content-section">
