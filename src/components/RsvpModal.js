@@ -1,4 +1,3 @@
-// RsvpModal.js
 import React, { useState, useEffect } from 'react';
 
 const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
@@ -7,6 +6,7 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
         guests: [{ firstName: '', lastName: '' }], // Array to hold multiple guests
         currentGuestIndex: 0, // Track which guest is being edited
         email: '', phone: '',
+        receiveUpdates: false, // Opt-in state
         attending: null,
         entree: { chicken: 0, pasta: 0, kids: 0 }, // Object for entree counts
         accommodations: null,
@@ -27,10 +27,10 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
         return error;
     };
 
-    // Handle input changes for the primary contact fields (email, phone, address, message)
+    // Handle input changes for the primary contact fields (email, phone, address, message, receiveUpdates)
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
         setErrors(prev => ({ ...prev, [name]: '' }));
     };
 
@@ -146,6 +146,7 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
                 "bot-field": "",
                 email: formData.email,
                 phone: formData.phone,
+                receiveUpdates: formData.receiveUpdates ? 'Yes' : 'No', // Send 'Yes' or 'No' for opt-in
                 attending: formData.attending,
                 accommodations: formData.accommodations,
                 address: formData.address,
@@ -176,7 +177,7 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
             onSubmit("There was an error submitting your RSVP. Please try again.");
         }
     };
-    
+
     useEffect(() => {
         if (isOpen) {
             setStep(1);
@@ -184,6 +185,7 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
                 guests: [{ firstName: '', lastName: '' }], // Reset to one guest
                 currentGuestIndex: 0,
                 email: '', phone: '',
+                receiveUpdates: false, // Reset opt-in state
                 attending: null,
                 entree: { chicken: 0, pasta: 0, kids: 0 },
                 accommodations: null,
@@ -200,7 +202,7 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
         <div className={`rsvp-modal ${isOpen ? 'show' : ''}`} onClick={onClose} role="dialog" aria-modal="true">
             <div className="rsvp-modal-content" onClick={e => e.stopPropagation()}>
                 <div className="rsvp-modal-header">
-                    <h2>The Bowens</h2>
+                    <h2>The Bowen's</h2>
                     <p>Oklahoma City, OK, USA</p>
                 </div>
 
@@ -251,7 +253,7 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
                         <button className="button" onClick={nextStep}>Next</button>
                     </div>
                 )}
-                
+
                 {step === 2 && (
                     <div>
                         <div className="rsvp-form-field" style={{marginBottom: '1rem'}}>
@@ -262,6 +264,20 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
                         <div className="rsvp-form-field">
                             <label htmlFor="phone">Mobile Phone</label>
                             <input type="tel" name="phone" id="phone" value={formData.phone} onChange={handleInputChange} />
+                        </div>
+                        {/* Opt-in checkbox */}
+                        <div className="rsvp-form-field" style={{ flexDirection: 'row', alignItems: 'center', marginTop: '1.5rem' }}>
+                            <input
+                                type="checkbox"
+                                name="receiveUpdates"
+                                id="receiveUpdates"
+                                checked={formData.receiveUpdates}
+                                onChange={handleInputChange}
+                                style={{ marginRight: '0.5rem', width: 'auto' }}
+                            />
+                            <label htmlFor="receiveUpdates" style={{ margin: 0, fontSize: '1rem', color: '#333' }}>
+                                Opt-in to receive important wedding updates via email/text.
+                            </label>
                         </div>
                         <button className="button" onClick={nextStep} disabled={!formData.email || errors.email}>Get Started</button>
                     </div>
@@ -329,7 +345,7 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
                         <button className="button" onClick={nextStep} disabled={formData.attending === null || (formData.attending === 'yes' && Object.values(formData.entree).every(count => count === 0))}>Next</button>
                     </div>
                 )}
-                
+
                 {step === 4 && (
                     <div>
                         <div className="rsvp-question" role="radiogroup" aria-labelledby="accommodations-question">
