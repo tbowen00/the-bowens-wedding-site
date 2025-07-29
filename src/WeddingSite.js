@@ -198,7 +198,7 @@ export default function WeddingSite() {
                 <iframe
                     title="Spotify Playlist"
                     style={{borderRadius: '12px', border: 'none'}}
-                    src="https://open.spotify.com/embed/playlist/1IW9C77E5NwUXJs6o4QplP?utm_source=generator&theme=0" // IMPORTANT: Replace this with your actual Spotify embed URL!
+                    src="Phttps://open.spotify.com/embed/playlist/1IW9C77E5NwUXJs6o4QplP?utm_source=generator&theme=0" // <--- REPLACE THIS PLACEHOLDER!
                     width="100%"
                     height="352"
                     allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
