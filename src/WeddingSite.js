@@ -11,7 +11,7 @@ export default function WeddingSite() {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isRsvpModalOpen, setIsRsvpModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-  
+
   const mainContentRef = useRef(null);
   const sectionRefs = {
     schedule: useRef(null), menu: useRef(null), hotels: useRef(null),
@@ -27,7 +27,7 @@ export default function WeddingSite() {
       setCurrentPage('gallery');
       return;
     }
-    
+
     // If we are not on the home page, switch back before scrolling
     if (currentPage !== 'home') {
       setCurrentPage('home');
@@ -40,14 +40,14 @@ export default function WeddingSite() {
     } else {
       // Otherwise, just scroll
       if (sectionRefs[id] && sectionRefs[id].current) {
-          sectionRefs[id].current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        sectionRefs[id].current.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
   };
-  
+
   const handleViewDetails = () => {
     if (sectionRefs.schedule && sectionRefs.schedule.current) {
-        sectionRefs.schedule.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      sectionRefs.schedule.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
@@ -66,8 +66,8 @@ export default function WeddingSite() {
         <input type="text" name="bot-field" />
       </form>
 
-      <RsvpModal 
-        isOpen={isRsvpModalOpen} 
+      <RsvpModal
+        isOpen={isRsvpModalOpen}
         onClose={() => setIsRsvpModalOpen(false)}
         onSubmit={(message) => setModalMessage(message)}
       />
@@ -77,14 +77,14 @@ export default function WeddingSite() {
         <ImageSlideshow />
         <main className="content-column" ref={mainContentRef}>
           <div className="content-wrapper">
-            
+
             <section className="welcome-section">
-                <div className="welcome-heading">
-                    <h1>The Bowen's</h1>
-                    <p>July 17, 2027 — Coles Garden, Oklahoma City</p>
-                </div>
-                <button className="rsvp-button-outline" onClick={() => setIsRsvpModalOpen(true)}>RSVP</button>
-                <div className="scroll-indicator" onClick={handleViewDetails}>↓</div>
+              <div className="welcome-heading">
+                <h1>The Bowen's</h1>
+                <p>July 17, 2027 — Coles Garden, Oklahoma City</p>
+              </div>
+              <button className="rsvp-button-outline" onClick={() => setIsRsvpModalOpen(true)}>RSVP</button>
+              <div className="scroll-indicator" onClick={handleViewDetails}>↓</div>
             </section>
 
             <section id="schedule" ref={sectionRefs.schedule} className="content-section">
@@ -130,19 +130,19 @@ export default function WeddingSite() {
                     <h3><a href="https://www.marriott.com/en-us/hotels/okcbw-renaissance-waterford-oklahoma-city-hotel/overview/" target="_blank" rel="noopener noreferrer">Renaissance Waterford OKC</a></h3>
                     <p className="hotel-address">6300 Waterford Blvd</p>
                     <div className="hotel-details">
-                        <span>~$140–150 / night</span>
-                        <span>~3.3 mi (≈7 min)</span>
+                      <span>~$140–150 / night</span>
+                      <span>~3.3 mi (≈7 min)</span>
                     </div>
                     <p className="hotel-phone">(405) 848‑4782</p>
                   </div>
                 </div>
-                 <div className="hotel-card">
+                <div className="hotel-card">
                   <div className="hotel-info">
                     <h3><a href="https://www.hilton.com/en/hotels/okcqlhw-homewood-suites-oklahoma-city-quail-springs/" target="_blank" rel="noopener noreferrer">Homewood Suites Quail Springs</a></h3>
                     <p className="hotel-address">6000 W Memorial Rd</p>
                     <div className="hotel-details">
-                        <span>~$110–150 / night</span>
-                        <span>~5.9 mi (≈11 min)</span>
+                      <span>~$110–150 / night</span>
+                      <span>~5.9 mi (≈11 min)</span>
                     </div>
                     <p className="hotel-phone">(405) 470‑0333</p>
                   </div>
@@ -152,30 +152,30 @@ export default function WeddingSite() {
                     <h3><a href="https://www.hilton.com/en/hotels/okcqugi-hilton-garden-inn-oklahoma-city-north-quail-springs/" target="_blank" rel="noopener noreferrer">Hilton Garden Inn North Quail Springs</a></h3>
                     <p className="hotel-address">3201 NW 137th St</p>
                     <div className="hotel-details">
-                        <span>~$90–130 / night</span>
-                        <span>~2.8 mi (≈8 min)</span>
+                      <span>~$90–130 / night</span>
+                      <span>~2.8 mi (≈8 min)</span>
                     </div>
                     <p className="hotel-phone">(405) 752‑5200</p>
                   </div>
                 </div>
-                 <div className="hotel-card">
+                <div className="hotel-card">
                   <div className="hotel-info">
                     <h3><a href="https://www.hilton.com/en/hotels/okcones-embassy-suites-oklahoma-city-northwest/" target="_blank" rel="noopener noreferrer">Embassy Suites NW</a></h3>
                     <p className="hotel-address">3233 NW Expressway</p>
                     <div className="hotel-details">
-                        <span>~$150–185 / night</span>
-                        <span>~4.3 mi (≈9 min)</span>
+                      <span>~$150–185 / night</span>
+                      <span>~4.3 mi (≈9 min)</span>
                     </div>
                     <p className="hotel-phone">(405) 842‑6633</p>
                   </div>
                 </div>
-                 <div className="hotel-card">
+                <div className="hotel-card">
                   <div className="hotel-info">
                     <h3><a href="https://www.ihg.com/holidayinnexpress/hotels/us/en/oklahoma-city/okcpa/hoteldetail" target="_blank" rel="noopener noreferrer">Holiday Inn Express NW‑Quail Springs</a></h3>
                     <p className="hotel-address">3520 NW 135th St</p>
                     <div className="hotel-details">
-                        <span>~$110 (varies) / night</span>
-                        <span>~2.3 mi (≈6 min)</span>
+                      <span>~$110 (varies) / night</span>
+                      <span>~2.3 mi (≈6 min)</span>
                     </div>
                     <p className="hotel-phone">1‑877‑403‑0945</p>
                   </div>
@@ -191,25 +191,28 @@ export default function WeddingSite() {
               </div>
             </section>
 
+            // WeddingSite.js (partial code - showing only the Spotify section)
+
             <section id="spotify" ref={sectionRefs.spotify} className="content-section">
               <h2>Our Playlist</h2>
               <p>Help us build the soundtrack for our wedding night! Add your favorite songs to our collaborative playlist.</p>
               <div className="spotify-container">
                 <iframe
-                    title="Spotify Playlist"
-                    style={{borderRadius: '12px', border: 'none'}}
-                    src="Phttps://open.spotify.com/embed/playlist/1IW9C77E5NwUXJs6o4QplP?utm_source=generator&theme=0" // <--- REPLACE THIS PLACEHOLDER!
-                    width="100%"
-                    height="352"
-                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                    loading="lazy"
+                  title="Spotify Playlist"
+                  style={{ borderRadius: '12px', border: 'none' }}
+                  src="https://open.spotify.com/embed/playlist/1IW9C77E5NwUXJs6o4QplP?utm_source=generator&theme=0" // Make sure this is your actual embed URL for the player!
+                  width="100%"
+                  height="352"
+                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                  loading="lazy"
                 ></iframe>
               </div>
-              <p style={{textAlign: 'center', marginTop: '1rem'}}>
-                  <a href="https://open.spotify.com/playlist/1IW9C77E5NwUXJs6o4QplP?si=2d419aa3b9904e39&pt=ffc2fb22dfa606bf0d68cbcfcdcb825e" target="_blank" rel="noopener noreferrer">
-                      Open and collaborate on Spotify!
-                  </a>
-              </p>
+              {/* Change the direct link to a button */}
+              <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+                <a href="https://open.spotify.com/playlist/1IW9C77E5NwUXJs6o4QplP?si=ef496b4fffc04594&pt=850048bc34310e83e2592fc46fb0cafc" target="_blank" rel="noopener noreferrer" className="rsvp-button-outline">
+                  Open Spotify
+                </a>
+              </div>
             </section>
 
             <section id="registry" ref={sectionRefs.registry} className="content-section">
@@ -235,10 +238,10 @@ export default function WeddingSite() {
                 ></iframe>
               </div>
             </section>
-            
-            <footer style={{textAlign: 'center', marginTop: '4rem', color: '#777'}}>
-                <p>© 2027 The Bowen's. All Rights Reserved.</p>
-                <p>With love, from the future Mr. & Mrs. Bowen</p>
+
+            <footer style={{ textAlign: 'center', marginTop: '4rem', color: '#777' }}>
+              <p>© 2027 The Bowen's. All Rights Reserved.</p>
+              <p>With love, from the future Mr. & Mrs. Bowen</p>
             </footer>
           </div>
         </main>
