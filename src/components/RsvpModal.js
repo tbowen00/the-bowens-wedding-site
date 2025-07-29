@@ -4,12 +4,18 @@ import React, { useState, useEffect } from 'react';
 const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
-        firstName: '', lastName: '', email: '', phone: '',
-        attending: null, entree: '', accommodations: null,
-        address: '', message: ''
+        guests: [{ firstName: '', lastName: '' }], // Array to hold multiple guests
+        currentGuestIndex: 0, // Track which guest is being edited
+        email: '', phone: '',
+        attending: null,
+        entree: { chicken: 0, pasta: 0, kids: 0 }, // Object for entree counts
+        accommodations: null,
+        address: '',
+        message: ''
     });
     const [errors, setErrors] = useState({});
 
+    // Helper to validate individual fields
     const validateField = (name, value) => {
         let error = '';
         if (name === 'firstName' && !value.trim()) error = 'First Name is required.';
@@ -21,29 +27,90 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
         return error;
     };
 
+    // Handle input changes for the primary contact fields (email, phone, address, message)
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
         setErrors(prev => ({ ...prev, [name]: '' }));
     };
-    
+
+    // Handle input changes specifically for guest names (first and last)
+    const handleGuestInputChange = (e, index) => {
+        const { name, value } = e.target;
+        const newGuests = [...formData.guests];
+        newGuests[index] = { ...newGuests[index], [name]: value };
+        setFormData(prev => ({ ...prev, guests: newGuests }));
+        // Clear errors specific to the guest field
+        setErrors(prev => ({
+            ...prev,
+            [`guest-${index}-${name}`]: ''
+        }));
+    };
+
+    // Handle selection for radio-like options (attending, accommodations)
     const handleOptionSelect = (name, value) => {
         setFormData(prev => ({ ...prev, [name]: value }));
+        setErrors(prev => ({ ...prev, [name]: '' }));
+    };
+
+    // Handle changes for entree counts
+    const handleEntreeCountChange = (type, increment) => {
+        setFormData(prev => {
+            const newCount = Math.max(0, prev.entree[type] + increment);
+            return {
+                ...prev,
+                entree: { ...prev.entree, [type]: newCount }
+            };
+        });
+        setErrors(prev => ({ ...prev, entree: '' })); // Clear entree error on change
+    };
+
+    // Add another guest input field
+    const addGuest = () => {
+        setFormData(prev => ({
+            ...prev,
+            guests: [...prev.guests, { firstName: '', lastName: '' }],
+            currentGuestIndex: prev.guests.length // Move to the new guest
+        }));
+        setErrors({}); // Clear errors when adding a new guest
+    };
+
+    // Remove a guest
+    const removeGuest = (index) => {
+        if (formData.guests.length > 1) { // Ensure at least one guest remains
+            setFormData(prev => {
+                const newGuests = prev.guests.filter((_, i) => i !== index);
+                const newIndex = Math.min(index, newGuests.length - 1);
+                return {
+                    ...prev,
+                    guests: newGuests,
+                    currentGuestIndex: newIndex
+                };
+            });
+            setErrors({}); // Clear errors when removing a guest
+        }
     };
 
     const nextStep = () => {
         let currentErrors = {};
+
         if (step === 1) {
-            const firstNameError = validateField('firstName', formData.firstName);
-            const lastNameError = validateField('lastName', formData.lastName);
-            if (firstNameError) currentErrors.firstName = firstNameError;
-            if (lastNameError) currentErrors.lastName = lastNameError;
+            // Validate all guests' first and last names
+            formData.guests.forEach((guest, index) => {
+                const firstNameError = validateField('firstName', guest.firstName);
+                const lastNameError = validateField('lastName', guest.lastName);
+                if (firstNameError) currentErrors[`guest-${index}-firstName`] = firstNameError;
+                if (lastNameError) currentErrors[`guest-${index}-lastName`] = lastNameError;
+            });
         } else if (step === 2) {
             const emailError = validateField('email', formData.email);
             if (emailError) currentErrors.email = emailError;
         } else if (step === 3) {
             if (formData.attending === null) currentErrors.attending = 'Please select if you will be attending.';
-            if (formData.entree === '') currentErrors.entree = 'Please select an entree.';
+            // Validate if at least one entree is selected if attending
+            if (formData.attending === 'yes' && Object.values(formData.entree).every(count => count === 0)) {
+                currentErrors.entree = 'Please select at least one entree.';
+            }
         }
 
         if (Object.keys(currentErrors).length > 0) {
@@ -73,11 +140,28 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
         onSubmit("Submitting your RSVP..."); // Show temporary message
 
         try {
-            // Perform the actual submission to Netlify
+            // Prepare data for Netlify Forms
+            const dataToSubmit = {
+                "form-name": "rsvp",
+                "bot-field": "",
+                email: formData.email,
+                phone: formData.phone,
+                attending: formData.attending,
+                accommodations: formData.accommodations,
+                address: formData.address,
+                message: formData.message,
+                // Flatten guests array for easier viewing in Netlify forms
+                guests: formData.guests.map(g => `${g.firstName} ${g.lastName}`).join('; '),
+                // Flatten entree counts
+                entree_chicken: formData.entree.chicken,
+                entree_pasta: formData.entree.pasta,
+                entree_kids: formData.entree.kids,
+            };
+
             const response = await fetch("/", {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: encode({ "form-name": "rsvp", "bot-field": "", ...formData }) // Include hidden form fields
+                body: encode(dataToSubmit)
             });
 
             if (!response.ok) {
@@ -85,7 +169,7 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
             }
 
             console.log("RSVP Submitted:", formData);
-            onSubmit(`Thank you, ${formData.firstName}! Your RSVP has been recorded.`);
+            onSubmit(`Thank you, ${formData.guests[0].firstName}! Your RSVP has been recorded.`);
             onClose();
         } catch (error) {
             console.error("RSVP submission error:", error);
@@ -97,9 +181,14 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
         if (isOpen) {
             setStep(1);
             setFormData({
-                firstName: '', lastName: '', email: '', phone: '',
-                attending: null, entree: '', accommodations: null,
-                address: '', message: ''
+                guests: [{ firstName: '', lastName: '' }], // Reset to one guest
+                currentGuestIndex: 0,
+                email: '', phone: '',
+                attending: null,
+                entree: { chicken: 0, pasta: 0, kids: 0 },
+                accommodations: null,
+                address: '',
+                message: ''
             });
             setErrors({}); // Clear errors when opening
         }
@@ -111,26 +200,54 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
         <div className={`rsvp-modal ${isOpen ? 'show' : ''}`} onClick={onClose} role="dialog" aria-modal="true">
             <div className="rsvp-modal-content" onClick={e => e.stopPropagation()}>
                 <div className="rsvp-modal-header">
-                    <h2>The Bowen's</h2>
+                    <h2>The Bowens</h2>
                     <p>Oklahoma City, OK, USA</p>
                 </div>
 
-                {/* Each step will have its inputs, but they are logically part of one form */}
                 {step === 1 && (
                     <div>
-                        <p>Enter your name to RSVP</p>
-                        <div className="rsvp-form-grid">
-                            <div className="rsvp-form-field">
-                                <label htmlFor="firstName">First Name</label>
-                                <input type="text" name="firstName" id="firstName" value={formData.firstName} onChange={handleInputChange} />
-                                {errors.firstName && <p className="error-message">{errors.firstName}</p>}
+                        <p>Enter guest names to RSVP</p>
+                        {formData.guests.map((guest, index) => (
+                            <div key={index} style={{ marginBottom: '1rem', border: '1px solid #eee', padding: '1rem', borderRadius: '5px' }}>
+                                <h4 style={{ margin: '0 0 1rem', color: '#6F4E37' }}>Guest {index + 1}</h4>
+                                <div className="rsvp-form-grid">
+                                    <div className="rsvp-form-field">
+                                        <label htmlFor={`firstName-${index}`}>First Name</label>
+                                        <input
+                                            type="text"
+                                            name="firstName"
+                                            id={`firstName-${index}`}
+                                            value={guest.firstName}
+                                            onChange={(e) => handleGuestInputChange(e, index)}
+                                        />
+                                        {errors[`guest-${index}-firstName`] && <p className="error-message">{errors[`guest-${index}-firstName`]}</p>}
+                                    </div>
+                                    <div className="rsvp-form-field">
+                                        <label htmlFor={`lastName-${index}`}>Last Name</label>
+                                        <input
+                                            type="text"
+                                            name="lastName"
+                                            id={`lastName-${index}`}
+                                            value={guest.lastName}
+                                            onChange={(e) => handleGuestInputChange(e, index)}
+                                        />
+                                        {errors[`guest-${index}-lastName`] && <p className="error-message">{errors[`guest-${index}-lastName`]}</p>}
+                                    </div>
+                                </div>
+                                {formData.guests.length > 1 && (
+                                    <button
+                                        className="cancel-button" // Reuse cancel-button style
+                                        onClick={() => removeGuest(index)}
+                                        style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}
+                                    >
+                                        Remove Guest
+                                    </button>
+                                )}
                             </div>
-                            <div className="rsvp-form-field">
-                                <label htmlFor="lastName">Last Name</label>
-                                <input type="text" name="lastName" id="lastName" value={formData.lastName} onChange={handleInputChange} />
-                                {errors.lastName && <p className="error-message">{errors.lastName}</p>}
-                            </div>
-                        </div>
+                        ))}
+                        <button className="rsvp-button-outline" onClick={addGuest} style={{ width: '100%', marginBottom: '1rem' }}>
+                            + Add Another Guest
+                        </button>
                         <button className="button" onClick={nextStep}>Next</button>
                     </div>
                 )}
@@ -176,40 +293,40 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
                             </div>
                             {errors.attending && <p className="error-message">{errors.attending}</p>}
                         </div>
-                        <div className="rsvp-question" role="radiogroup" aria-labelledby="entree-question">
-                            <p id="entree-question">2. What entree would you prefer at our wedding?</p>
-                            <div className="radio-group">
-                                <button
-                                    onClick={() => handleOptionSelect('entree', 'chicken')}
-                                    className={formData.entree === 'chicken' ? 'selected' : ''}
-                                    role="radio"
-                                    aria-checked={formData.entree === 'chicken'}
-                                    tabIndex={formData.entree === 'chicken' ? 0 : -1}
-                                >
-                                    Chicken
-                                </button>
-                                <button
-                                    onClick={() => handleOptionSelect('entree', 'pasta')}
-                                    className={formData.entree === 'pasta' ? 'selected' : ''}
-                                    role="radio"
-                                    aria-checked={formData.entree === 'pasta'}
-                                    tabIndex={formData.entree === 'pasta' ? 0 : -1}
-                                >
-                                    Pasta (vegetarian)
-                                </button>
-                                <button
-                                    onClick={() => handleOptionSelect('entree', 'kids')}
-                                    className={formData.entree === 'kids' ? 'selected' : ''}
-                                    role="radio"
-                                    aria-checked={formData.entree === 'kids'}
-                                    tabIndex={formData.entree === 'kids' ? 0 : -1}
-                                >
-                                    Kids' meal
-                                </button>
+
+                        {/* Entree Selection with Counters */}
+                        <div className="rsvp-question">
+                            <p>2. How many of each entree would you like?</p>
+                            <div className="entree-counter-group">
+                                <div className="entree-item">
+                                    <span>Chicken</span>
+                                    <div className="counter-controls">
+                                        <button type="button" onClick={() => handleEntreeCountChange('chicken', -1)}>-</button>
+                                        <span>{formData.entree.chicken}</span>
+                                        <button type="button" onClick={() => handleEntreeCountChange('chicken', 1)}>+</button>
+                                    </div>
+                                </div>
+                                <div className="entree-item">
+                                    <span>Pasta (vegetarian)</span>
+                                    <div className="counter-controls">
+                                        <button type="button" onClick={() => handleEntreeCountChange('pasta', -1)}>-</button>
+                                        <span>{formData.entree.pasta}</span>
+                                        <button type="button" onClick={() => handleEntreeCountChange('pasta', 1)}>+</button>
+                                    </div>
+                                </div>
+                                <div className="entree-item">
+                                    <span>Kids' meal</span>
+                                    <div className="counter-controls">
+                                        <button type="button" onClick={() => handleEntreeCountChange('kids', -1)}>-</button>
+                                        <span>{formData.entree.kids}</span>
+                                        <button type="button" onClick={() => handleEntreeCountChange('kids', 1)}>+</button>
+                                    </div>
+                                </div>
                             </div>
                             {errors.entree && <p className="error-message">{errors.entree}</p>}
                         </div>
-                        <button className="button" onClick={nextStep} disabled={formData.attending === null || formData.entree === ''}>Next</button>
+
+                        <button className="button" onClick={nextStep} disabled={formData.attending === null || (formData.attending === 'yes' && Object.values(formData.entree).every(count => count === 0))}>Next</button>
                     </div>
                 )}
                 
