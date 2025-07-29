@@ -191,8 +191,6 @@ export default function WeddingSite() {
               </div>
             </section>
 
-            // WeddingSite.js (partial code - showing only the Spotify section)
-
             <section id="spotify" ref={sectionRefs.spotify} className="content-section">
               <h2>Our Playlist</h2>
               <p>Help us build the soundtrack for our wedding night! Add your favorite songs to our collaborative playlist.</p>
