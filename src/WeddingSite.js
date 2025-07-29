@@ -80,7 +80,7 @@ export default function WeddingSite() {
             
             <section className="welcome-section">
                 <div className="welcome-heading">
-                    <h1>The Bowens</h1>
+                    <h1>The Bowen's</h1>
                     <p>July 17, 2027 — Coles Garden, Oklahoma City</p>
                 </div>
                 <button className="rsvp-button-outline" onClick={() => setIsRsvpModalOpen(true)}>RSVP</button>
@@ -232,7 +232,7 @@ export default function WeddingSite() {
             </section>
             
             <footer style={{textAlign: 'center', marginTop: '4rem', color: '#777'}}>
-                <p>© 2027 The Bowens. All Rights Reserved.</p>
+                <p>© 2027 The Bowen's. All Rights Reserved.</p>
                 <p>With love, from the future Mr. & Mrs. Bowen</p>
             </footer>
           </div>

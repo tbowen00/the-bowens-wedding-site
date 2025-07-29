@@ -111,7 +111,7 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
         <div className={`rsvp-modal ${isOpen ? 'show' : ''}`} onClick={onClose} role="dialog" aria-modal="true">
             <div className="rsvp-modal-content" onClick={e => e.stopPropagation()}>
                 <div className="rsvp-modal-header">
-                    <h2>The Bowens</h2>
+                    <h2>The Bowen's</h2>
                     <p>Oklahoma City, OK, USA</p>
                 </div>
 
