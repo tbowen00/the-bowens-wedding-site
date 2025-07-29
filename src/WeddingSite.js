@@ -215,7 +215,7 @@ export default function WeddingSite() {
                 <iframe
                     title="Spotify Playlist"
                     style={{borderRadius: '12px', border: 'none'}}
-                    src="YOUR_ACTUAL_SPOTIFY_EMBED_URL_HERE" // IMPORTANT: Replace this with your actual Spotify embed URL!
+                    src="https://open.spotify.com/embed/playlist/1IW9C77E5NwUXJs6o4QplP?utm_source=generator&theme=0" // IMPORTANT: Replace this with your actual Spotify embed URL!
                     width="100%"
                     height="352"
                     allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
@@ -224,7 +224,7 @@ export default function WeddingSite() {
               </div>
               {/* Direct link for collaboration as a button */}
               <div style={{textAlign: 'center', marginTop: '1rem'}}>
-                  <a href="PASTE_YOUR_ACTUAL_SPOTIFY_SHARE_LINK_HERE" target="_blank" rel="noopener noreferrer" className="rsvp-button-outline">
+                  <a href="https://open.spotify.com/playlist/1IW9C77E5NwUXJs6o4QplP?si=11fde8d1b6354b1b&pt=a83226ad2818fbcce99a11233666fb46" target="_blank" rel="noopener noreferrer" className="rsvp-button-outline">
                       Open Spotify
                   </a>
               </div>
