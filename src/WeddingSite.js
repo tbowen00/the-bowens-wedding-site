@@ -15,7 +15,6 @@ export default function WeddingSite() {
   const mainContentRef = useRef(null);
   const sectionRefs = {
     schedule: useRef(null), menu: useRef(null), hotels: useRef(null),
-    // Removed 'photos' from here as it now directly triggers GalleryPage or leads to a Gallery link
     games: useRef(null), spotify: useRef(null),
     registry: useRef(null), directions: useRef(null),
   };
@@ -58,10 +57,19 @@ export default function WeddingSite() {
 
   return (
     <>
+      {/* Hidden form for Netlify Forms detection */}
+      {/* This form is what Netlify "sees" to collect submissions. */}
+      {/* The actual inputs are rendered within RsvpModal. */}
+      <form name="rsvp" data-netlify="true" netlify-honeypot="bot-field" hidden>
+        <input type="hidden" name="form-name" value="rsvp" />
+        {/* This hidden field is for Netlify's spam protection (honeypot) */}
+        <input type="text" name="bot-field" />
+      </form>
+
       <RsvpModal 
         isOpen={isRsvpModalOpen} 
         onClose={() => setIsRsvpModalOpen(false)}
-        onSubmit={(message) => setModalMessage(message)} // Updated to receive and set message
+        onSubmit={(message) => setModalMessage(message)}
       />
       <Modal message={modalMessage} onClose={() => setModalMessage('')} />
       <div className="app-container">
@@ -108,7 +116,7 @@ export default function WeddingSite() {
               <button className="button">Upload Photos</button>
             </section>
 
-            <section id="gallery" className="content-section"> {/* Removed ref={sectionRefs.photos} here */}
+            <section id="gallery" className="content-section">
               <h2>Gallery</h2>
               <p>We'd love to see our wedding through your eyes! Click below to view and share photos from our special day.</p>
               <button className="rsvp-button-outline" onClick={() => setCurrentPage('gallery')}>View Photos</button>
@@ -190,7 +198,7 @@ export default function WeddingSite() {
                 <iframe
                     title="Spotify Playlist"
                     style={{borderRadius: '12px', border: 'none'}}
-                    src="https://open.spotify.com/embed/playlist/1IW9C77E5NwUXJs6o4QplP?utm_source=generator&theme=0" // Updated to a real Spotify embed URL
+                    src="https://open.spotify.com/embed/playlist/1IW9C77E5NwUXJs6o4QplP?utm_source=generator&theme=0" // IMPORTANT: Replace this with your actual Spotify embed URL!
                     width="100%"
                     height="352"
                     allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
@@ -202,8 +210,8 @@ export default function WeddingSite() {
             <section id="registry" ref={sectionRefs.registry} className="content-section">
               <h2>Registry</h2>
               <p>Your presence is the greatest gift of all. However, if you wish to honor us with a gift, we have registered at the following places:</p>
-              <p><a href="https://www.amazon.com/wedding/share/thebowenswedding" target="_blank" rel="noopener noreferrer">Amazon Registry</a></p> {/* Example link */}
-              <p><a href="https://www.target.com/gift-registry/wedding/thebowenswedding" target="_blank" rel="noopener noreferrer">Target Registry</a></p> {/* Example link */}
+              <p><a href="https://www.amazon.com/wedding/share/thebowenswedding" target="_blank" rel="noopener noreferrer">Amazon Registry</a></p>
+              <p><a href="https://www.target.com/gift-registry/wedding/thebowenswedding" target="_blank" rel="noopener noreferrer">Target Registry</a></p>
             </section>
 
             <section id="directions" ref={sectionRefs.directions} className="content-section">
@@ -212,7 +220,7 @@ export default function WeddingSite() {
               <div className="map-container">
                 <iframe
                   title="Map to Coles Garden"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3235.158141443653!2d-97.51900382348123!3d35.54133464010884!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x87b2183c5a61099f%3A0xb3624e5e1b2f1e2c!2sColes%20Garden!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus" // Updated to a real Google Maps embed URL
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3235.158141443653!2d-97.51900382348123!3d35.54133464010884!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x87b2183c5a61099f%3A0xb3624e5e1b2f1e2c!2sColes%20Garden!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus" // Placeholder - update with actual Google Maps embed URL
                   width="100%"
                   height="350"
                   style={{ border: 0 }}

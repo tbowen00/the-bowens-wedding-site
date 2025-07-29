@@ -24,7 +24,6 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
-        // Clear error as user types
         setErrors(prev => ({ ...prev, [name]: '' }));
     };
     
@@ -42,6 +41,9 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
         } else if (step === 2) {
             const emailError = validateField('email', formData.email);
             if (emailError) currentErrors.email = emailError;
+        } else if (step === 3) {
+            if (formData.attending === null) currentErrors.attending = 'Please select if you will be attending.';
+            if (formData.entree === '') currentErrors.entree = 'Please select an entree.';
         }
 
         if (Object.keys(currentErrors).length > 0) {
@@ -51,22 +53,38 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
         setStep(prev => prev + 1);
     };
 
+    const encode = (data) => {
+        return Object.keys(data)
+            .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(data[key]))
+            .join("&");
+    };
+
     const handleSubmit = async () => {
-        // Simulate API call
-        console.log("Submitting RSVP:", formData);
+        // Basic validation for step 4 before submission (if needed)
+        let currentErrors = {};
+        if (formData.accommodations === null) currentErrors.accommodations = 'Please select if you need accommodations.';
+        // Add more validation for address/message if desired
+
+        if (Object.keys(currentErrors).length > 0) {
+            setErrors(currentErrors);
+            return;
+        }
+
         onSubmit("Submitting your RSVP..."); // Show temporary message
 
         try {
-            // Simulate network delay
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            // In a real app:
-            // const response = await fetch('/api/rsvp', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify(formData)
-            // });
-            // if (!response.ok) throw new Error('Failed to submit RSVP');
+            // Perform the actual submission to Netlify
+            const response = await fetch("/", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: encode({ "form-name": "rsvp", "bot-field": "", ...formData }) // Include hidden form fields
+            });
 
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            console.log("RSVP Submitted:", formData);
             onSubmit(`Thank you, ${formData.firstName}! Your RSVP has been recorded.`);
             onClose();
         } catch (error) {
@@ -97,6 +115,7 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
                     <p>Oklahoma City, OK, USA</p>
                 </div>
 
+                {/* Each step will have its inputs, but they are logically part of one form */}
                 {step === 1 && (
                     <div>
                         <p>Enter your name to RSVP</p>
@@ -127,7 +146,7 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
                             <label htmlFor="phone">Mobile Phone</label>
                             <input type="tel" name="phone" id="phone" value={formData.phone} onChange={handleInputChange} />
                         </div>
-                        <button className="button" onClick={nextStep}>Get Started</button>
+                        <button className="button" onClick={nextStep} disabled={!formData.email || errors.email}>Get Started</button>
                     </div>
                 )}
 
@@ -155,8 +174,9 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
                                     Regretfully Decline
                                 </button>
                             </div>
+                            {errors.attending && <p className="error-message">{errors.attending}</p>}
                         </div>
-                         <div className="rsvp-question" role="radiogroup" aria-labelledby="entree-question">
+                        <div className="rsvp-question" role="radiogroup" aria-labelledby="entree-question">
                             <p id="entree-question">2. What entree would you prefer at our wedding?</p>
                             <div className="radio-group">
                                 <button
@@ -187,6 +207,7 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
                                     Kids' meal
                                 </button>
                             </div>
+                            {errors.entree && <p className="error-message">{errors.entree}</p>}
                         </div>
                         <button className="button" onClick={nextStep} disabled={formData.attending === null || formData.entree === ''}>Next</button>
                     </div>
@@ -216,6 +237,7 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
                                     No, thanks.
                                 </button>
                             </div>
+                            {errors.accommodations && <p className="error-message">{errors.accommodations}</p>}
                         </div>
                         <div className="rsvp-question">
                             <p>4. What is your mailing address?</p>
