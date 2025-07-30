@@ -6,21 +6,21 @@ const PhotoUploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
     const [isUploading, setIsUploading] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState(0);
+    const [uploadProgress, setUploadProgress] = useState(0); // For progress bar
     const [uploadError, setUploadError] = useState('');
     const [uploadSuccess, setUploadSuccess] = useState(false);
 
-    const CLOUDINARY_CLOUD_NAME = 'dtmhmxqiw';
-    const CLOUDINARY_UPLOAD_PRESET = 'wedding_upload_preset';
+    // CLOUDINARY_CLOUD_NAME and CLOUDINARY_UPLOAD_PRESET are NOT needed here anymore
+    // as the Netlify Function handles the Cloudinary interaction
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         if (file) {
             setSelectedFile(file);
-            setPreviewUrl(URL.createObjectURL(file));
-            setUploadProgress(0);
-            setUploadError('');
-            setUploadSuccess(false);
+            setPreviewUrl(URL.createObjectURL(file)); // Create a local URL for image preview
+            setUploadProgress(0); // Reset progress
+            setUploadError(''); // Clear previous errors
+            setUploadSuccess(false); // Reset success state
         } else {
             setSelectedFile(null);
             setPreviewUrl('');
@@ -40,7 +40,7 @@ const PhotoUploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
     };
 
     const handleDragOver = (event) => {
-        event.preventDefault();
+        event.preventDefault(); // Necessary to allow drop
     };
 
     const handleUpload = async () => {
@@ -50,42 +50,51 @@ const PhotoUploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
         }
 
         setIsUploading(true);
-        setUploadProgress(0);
+        setUploadProgress(0); // Start progress from 0
         setUploadError('');
         setUploadSuccess(false);
 
-        const formData = new FormData();
-        formData.append('file', selectedFile);
-        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        // Convert file to base64 for sending to Netlify Function
+        const reader = new FileReader();
+        reader.readAsDataURL(selectedFile); // Reads the file as a data URL (base64)
+        reader.onloadend = async () => {
+            const base64data = reader.result; // This is the base64 string
 
-        try {
-            const response = await fetch(
-                `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-                {
+            try {
+                // Send base64 data to Netlify Function endpoint
+                const response = await fetch('/.netlify/functions/upload-image', { // NEW ENDPOINT
                     method: 'POST',
-                    body: formData,
+                    headers: {
+                        'Content-Type': 'application/json', // We are sending JSON
+                    },
+                    body: JSON.stringify({ file: base64data }), // Send base64 string in the 'file' key
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Image upload failed.');
                 }
-            );
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error.message || 'Image upload failed.');
+                const data = await response.json();
+                console.log('Uploaded image data:', data);
+                setUploadProgress(100); // Set to 100% on success
+                setUploadSuccess(true); // Mark as successful
+                setIsUploading(false); // Stop uploading state
+
+                onUploadSuccess(data.secure_url); // Callback to parent to add image to gallery
+
+            } catch (error) {
+                console.error('Error uploading image:', error);
+                setUploadError(error.message || 'Failed to upload image. Please try again.');
+                setIsUploading(false);
+                setUploadProgress(0); // Reset progress on error
             }
-
-            const data = await response.json();
-            console.log('Uploaded image data:', data);
-            setUploadProgress(100);
-            setUploadSuccess(true);
-            setIsUploading(false);
-
-            onUploadSuccess(data.secure_url);
-
-        } catch (error) {
-            console.error('Error uploading image:', error);
-            setUploadError(error.message || 'Failed to upload image. Please try again.');
+        };
+        reader.onerror = () => {
+            setUploadError('Failed to read file.');
             setIsUploading(false);
             setUploadProgress(0);
-        }
+        };
     };
 
     const handleSubmit = () => {
@@ -96,6 +105,7 @@ const PhotoUploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
 
     return (
         <div className={`simple-modal ${isOpen ? 'show' : ''}`} onClick={onClose} role="dialog" aria-modal="true">
+            {/* The main modal content container */}
             <div className={`simple-modal-content ${styles['photo-upload-modal-content']}`} onClick={e => e.stopPropagation()}>
                 <button className={styles['close-button']} onClick={onClose} disabled={isUploading}>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
@@ -113,7 +123,6 @@ const PhotoUploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
                 >
                     {!selectedFile ? (
                         <>
-                            {/* REPLACED SVG WITH IMG TAG */}
                             <img src={`${process.env.PUBLIC_URL}/assets/images/cloud-computing.png`} alt="Upload Cloud Icon" className={styles['cloud-upload-icon']} />
                             <label htmlFor="photo-upload-input" className={styles['upload-text-prompt']}>
                                 Click to upload or drag and drop
@@ -135,7 +144,7 @@ const PhotoUploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
                             <div className={styles['file-details']}>
                                 <p className={styles['file-name']}>{selectedFile.name}</p>
                                 <p className={styles['file-size']}>{Math.round(selectedFile.size / 1024)} KB</p>
-                                
+
                                 {isUploading && (
                                     <div className={styles['progress-wrapper']}>
                                         <div className={styles['progress-bar']} style={{ width: `${uploadProgress}%` }}></div>
