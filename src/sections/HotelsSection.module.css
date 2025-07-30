@@ -1,0 +1,50 @@
+/* src/sections/HotelsSection.module.css */
+.hotel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  text-align: left;
+}
+
+.hotel-card {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.hotel-info {
+  padding: 1.5rem;
+}
+
+.hotel-info h3 {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  margin: 0 0 0.5rem 0;
+  color: var(--color-black);
+}
+
+.hotel-info h3 a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.hotel-address {
+    color: #777;
+    margin-bottom: 1rem;
+    font-size: 1rem !important; /* Retained !important for consistency with original, but consider refactoring */
+}
+
+.hotel-details {
+  display: flex;
+  justify-content: space-between; /* This is crucial for spacing price and distance */
+  margin-bottom: 1rem;
+  color: #777;
+  font-size: 0.9rem;
+}
+
+.hotel-phone {
+    font-weight: bold;
+    color: var(--color-mocha);
+    font-size: 1.1rem !important; /* Retained !important for consistency with original, but consider refactoring */
+}

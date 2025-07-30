@@ -22,22 +22,22 @@ body {
 
 .app-container {
   display: flex;
-  height: 100vh; /* This height will now apply to the main content area for desktop */
-  overflow: hidden; /* This will be overridden for mobile */
+  height: 100vh;
+  overflow: hidden;
 }
 
-/* --- Left Column: Image Slideshow --- */
+/* --- Left Column: Image Slideshow global container styling --- */
 .image-column {
   width: 60%;
   height: 100vh;
   position: relative;
   overflow: hidden;
   background-color: var(--color-black);
-  /* Ensure it's always block on mobile for vertical stacking */
+  /* This ensures it's always block on mobile for vertical stacking */
   display: block; /* Overridden by flex on desktop, but ensures visibility on mobile */
 }
 
-.slideshow-image {
+.slideshow-image { /* These specific image styles should stay global or be explicitly imported where used */
   position: absolute;
   top: 0;
   left: 0;
@@ -51,12 +51,12 @@ body {
   z-index: 1;
 }
 
-.slideshow-image.active {
+.slideshow-image.active { /* These specific image styles should stay global or be explicitly imported where used */
   opacity: 1;
   z-index: 2;
 }
 
-.slideshow-overlay {
+.slideshow-overlay { /* These specific overlay styles should stay global or be explicitly imported where used */
   position: absolute;
   bottom: 40px;
   left: 50%;
@@ -68,7 +68,7 @@ body {
   width: 100%;
 }
 
-.slideshow-overlay h1 {
+.slideshow-overlay h1 { /* These specific overlay styles should stay global or be explicitly imported where used */
   font-family: var(--font-heading);
   font-size: 4rem;
   margin: 0 0 0.5rem 0;
@@ -76,16 +76,17 @@ body {
   color: var(--color-white);
 }
 
-.slideshow-overlay p {
+.slideshow-overlay p { /* These specific overlay styles should stay global or be explicitly imported where used */
   font-size: 1.2rem;
   margin: 0;
   color: var(--color-white);
 }
 
-/* --- Right Column: Content --- */
+
+/* --- Right Column: Content global container styling --- */
 .content-column {
   width: 40%;
-  height: 100vh; /* This height will now be overridden for mobile */
+  height: 100vh;
   overflow-y: auto;
   scroll-behavior: smooth;
 }
@@ -96,70 +97,7 @@ body {
   padding: 0 3rem;
 }
 
-.welcome-section {
-    height: 100vh; /* This will be overridden for mobile */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-}
-
-.welcome-heading {
-    margin-bottom: 2rem;
-}
-
-.welcome-heading h1 {
-    font-family: var(--font-heading);
-    font-size: 3.5rem;
-    font-weight: 600;
-    margin: 0;
-    letter-spacing: 2px;
-}
-
-.welcome-heading p {
-    font-size: 1.2rem;
-    margin-top: 0.5rem;
-    color: var(--color-mocha);
-}
-
-.rsvp-button-outline {
-    background-color: transparent;
-    color: var(--color-mocha);
-    border: 1px solid var(--color-mocha);
-    padding: 0.7rem 2.5rem;
-    font-size: 1rem;
-    font-family: var(--font-body);
-    cursor: pointer;
-    border-radius: 5px;
-    transition: all 0.3s ease;
-}
-
-.rsvp-button-outline:hover {
-    background-color: var(--color-mocha);
-    color: var(--color-white);
-}
-
-.scroll-indicator {
-    margin-top: 1.5rem;
-    font-size: 1.5rem;
-    color: var(--color-mocha);
-    animation: bounce 2s infinite;
-    cursor: pointer;
-}
-
-@keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(-10px);
-  }
-  60% {
-    transform: translateY(-5px);
-  }
-}
-
+/* --- General Content Section Styles (applied to all sections) --- */
 .content-section {
   padding: 4rem 0;
   border-bottom: 1px solid #eee;
@@ -195,7 +133,7 @@ body {
   text-decoration: underline;
 }
 
-/* --- Navigation Menu --- */
+/* --- Navigation Menu (should always be global) --- */
 .menu-button {
   position: fixed;
   top: 25px;
@@ -284,14 +222,52 @@ body {
     visibility: visible;
 }
 
-/* --- RSVP Modal Styles --- */
-.rsvp-modal {
+/* --- Global Button Styles (applied to all 'button' and 'rsvp-button-outline' classes) --- */
+.button {
+  background-color: var(--color-mocha);
+  color: var(--color-white);
+  border: none;
+  padding: 0.8rem 2rem;
+  font-size: 1.1rem;
+  font-family: var(--font-body);
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-top: 1rem;
+  display: inline-block;
+  text-align: center;
+}
+
+.button:hover {
+  background-color: var(--color-black);
+  transform: translateY(-2px);
+}
+
+.rsvp-button-outline {
+    background-color: transparent;
+    color: var(--color-mocha);
+    border: 1px solid var(--color-mocha);
+    padding: 0.7rem 2.5rem;
+    font-size: 1rem;
+    font-family: var(--font-body);
+    cursor: pointer;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.rsvp-button-outline:hover {
+    background-color: var(--color-mocha);
+    color: var(--color-white);
+}
+
+/* --- Global Modal Styles (applies to both simple and RSVP modals) --- */
+.simple-modal, .rsvp-modal { /* Combined for common overlay styling */
   position: fixed; 
   top: 0; 
   left: 0; 
   right: 0; 
   bottom: 0;
-  background-color: rgba(0,0,0,0.6); 
+  background-color: rgba(0,0,0,0.6); /* Adjusted from 0.5 to 0.6 for consistency */
   display: flex;
   align-items: center; 
   justify-content: center; 
@@ -301,28 +277,39 @@ body {
   transition: opacity 0.3s ease, visibility 0.3s;
 }
 
-.rsvp-modal.show {
+.simple-modal.show, .rsvp-modal.show { /* Combined for common show styling */
   opacity: 1;
   visibility: visible;
 }
 
-.rsvp-modal-content {
+.simple-modal-content, .rsvp-modal-content { /* Combined for common content box styling */
   background-color: white; 
-  padding: 2rem; 
+  padding: 2rem; /* Initial padding, rsvp-modal-content has more specific */
   border-radius: 8px;
+  text-align: center; 
   box-shadow: 0 5px 15px rgba(0,0,0,0.3);
   transform: translateY(-20px);
   transition: transform 0.3s ease;
-  width: 90%;
-  max-width: 500px;
-  text-align: center;
-  /* ADDED for scrollable modal content */
-  max-height: 90vh; /* Limits the modal content height to 90% of viewport height */
-  overflow-y: auto; /* Adds a scrollbar when content overflows vertically */
 }
 
-.rsvp-modal.show .rsvp-modal-content {
+.simple-modal.show .simple-modal-content, .rsvp-modal.show .rsvp-modal-content {
     transform: translateY(0);
+}
+
+.simple-modal-content p { /* Simple modal specific text */
+  font-family: var(--font-body); 
+  font-size: 1.1rem; 
+  margin: 0 0 1.5rem 0;
+}
+
+
+/* --- Specific RSVP Modal Content Styles (these should remain global for the form structure) --- */
+.rsvp-modal-content {
+  width: 90%;
+  max-width: 500px;
+  /* Specific styles for RSVP modal scrolling */
+  max-height: 90vh; 
+  overflow-y: auto; 
 }
 
 .rsvp-modal-header h2 {
@@ -335,6 +322,7 @@ body {
     color: #666;
 }
 
+/* Specific form field styles */
 .rsvp-form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -416,147 +404,7 @@ body {
     cursor: pointer;
 }
 
-/* General Modal for simple messages */
-.simple-modal {
-  position: fixed; 
-  top: 0; 
-  left: 0; 
-  right: 0; 
-  bottom: 0;
-  background-color: rgba(0,0,0,0.5); 
-  display: flex;
-  align-items: center; 
-  justify-content: center; 
-  z-index: 2000;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s;
-}
-
-.simple-modal.show {
-  opacity: 1;
-  visibility: visible;
-}
-
-.simple-modal-content {
-  background-color: white; 
-  padding: 2rem 3rem; 
-  border-radius: 8px;
-  text-align: center; 
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-  transform: translateY(-20px);
-  transition: transform 0.3s ease;
-}
-
-.simple-modal.show .simple-modal-content {
-    transform: translateY(0);
-}
-
-.simple-modal-content p {
-  font-family: var(--font-body); 
-  font-size: 1.1rem; 
-  margin: 0 0 1.5rem 0;
-}
-
-.button {
-  background-color: var(--color-mocha);
-  color: var(--color-white);
-  border: none;
-  padding: 0.8rem 2rem;
-  font-size: 1.1rem;
-  font-family: var(--font-body);
-  cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  margin-top: 1rem;
-  display: inline-block;
-  text-align: center;
-}
-
-.button:hover {
-  background-color: var(--color-black);
-  transform: translateY(-2px);
-}
-
-.map-container, .spotify-container {
-    overflow: hidden;
-    border-radius: 8px;
-    margin-top: 1.5rem;
-    /* Ensure iframes fill their container */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.map-container iframe, .spotify-container iframe {
-    width: 100%;
-    height: 100%;
-}
-
-
-/* --- Hotel Section Styles --- */
-.hotel-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  text-align: left;
-}
-
-.hotel-card {
-  border: 1px solid #eee;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-.hotel-info {
-  padding: 1.5rem;
-}
-
-.hotel-info h3 {
-  font-family: var(--font-heading);
-  font-size: 1.5rem;
-  margin: 0 0 0.5rem 0;
-  color: var(--color-black);
-}
-
-.hotel-info h3 a {
-    color: inherit;
-    text-decoration: none;
-}
-
-.hotel-address {
-    color: #777;
-    margin-bottom: 1rem;
-    font-size: 1rem !important; /* Retained !important for consistency with original, but consider refactoring */
-}
-
-.hotel-details {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-  color: #777;
-  font-size: 0.9rem;
-}
-
-.hotel-phone {
-    font-weight: bold;
-    color: var(--color-mocha);
-    font-size: 1.1rem !important; /* Retained !important for consistency with original, but consider refactoring */
-}
-
-/* --- Games Section Styles --- */
-.games-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-.games-buttons .rsvp-button-outline {
-    margin-top: 0;
-}
-
-/* --- Entree Counter Styles (add these new styles) --- */
+/* Specific Entree Counter Styles */
 .entree-counter-group {
     display: flex;
     flex-direction: column;
@@ -578,7 +426,7 @@ body {
 .counter-controls {
     display: flex;
     align-items: center;
-    gap: 0.8rem; /* Adjusted for more spacing */
+    gap: 0.8rem;
 }
 
 .counter-controls button {
@@ -587,14 +435,14 @@ body {
     border: none;
     width: 30px;
     height: 30px;
-    border-radius: 50%; /* Makes buttons round */
+    border-radius: 50%;
     font-size: 1.2rem;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
     transition: background-color 0.2s ease;
-    padding: 0; /* Reset padding for circular buttons */
+    padding: 0;
 }
 
 .counter-controls button:hover {
@@ -604,124 +452,40 @@ body {
 .counter-controls span {
     font-size: 1.1rem;
     font-weight: bold;
-    min-width: 25px; /* Ensure space for number */
+    min-width: 25px;
     text-align: center;
 }
 
-/* --- Gallery Page Styles --- */
-.gallery-page {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-.gallery-header {
-  margin-bottom: 2rem;
-  position: relative;
-  text-align: center;
-}
-
-.gallery-header h1 {
-  font-family: var(--font-heading);
-  font-size: 3rem;
-  color: var(--color-mocha);
-  margin-bottom: 0.5rem;
-}
-
-.gallery-header p {
-  font-size: 1.1rem;
-  color: #666;
-}
-
-.back-button {
-  position: absolute;
-  top: 0;
-  left: 0;
-  background: none;
-  border: 1px solid #ddd;
-  color: var(--color-dark-grey);
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.back-button:hover {
-  background-color: var(--color-light-grey);
-  border-color: #ccc;
-}
-
-.gallery-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 15px;
-    margin-bottom: 1.5rem;
-}
-
-.gallery-item {
-    width: 100%;
-    padding-bottom: 100%; /* Creates a square aspect ratio */
-    position: relative;
-    overflow: hidden;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.gallery-item img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-}
-
-.gallery-item img:hover {
-    transform: scale(1.05);
-}
-
-
-/* --- Responsive Design --- */
+/* --- Responsive Design (Global Adjustments) --- */
 @media (max-width: 1024px) {
   .app-container {
-    /* For mobile, stack content vertically and allow scrolling */
     flex-direction: column;
-    height: auto; /* Allow height to expand with content */
-    overflow: visible; /* Allow scrolling */
+    height: auto;
+    overflow: visible;
   }
 
-  .image-column {
-    width: 100%; /* Take full width on mobile */
-    height: 100vh; /* Make it fill the viewport height initially */
-    position: relative; /* Ensure overlay positioning works */
-    order: -1; /* Place it before content-column */
-    /* Removed display: none; */
+  .image-column { /* This is the slideshow's global container */
+    width: 100%;
+    height: 100vh;
+    position: relative;
+    order: -1;
   }
 
-  .content-column {
-    width: 100%; /* Take full width on mobile */
-    height: auto; /* Allow content to dictate height */
-    overflow-y: visible; /* Allow scrolling for content */
+  .content-column { /* This is the main content area for desktop */
+    width: 100%;
+    height: auto;
+    overflow-y: visible;
   }
 
   .content-wrapper {
     padding: 0 1.5rem;
   }
 
-  .welcome-section {
-    /* Make this section shorter on mobile so users can scroll past the slideshow */
-    height: auto; /* Let content define height */
-    padding: 2rem 0; /* Add some padding */
+  .slideshow-overlay h1 { /* Mobile adjustment for slideshow text */
+      font-size: 3rem;
   }
-
-  /* Adjust slideshow overlay text for mobile if needed */
-  .slideshow-overlay h1 {
-      font-size: 3rem; /* Slightly smaller for mobile */
-  }
-  .slideshow-overlay p {
-      font-size: 1rem; /* Slightly smaller for mobile */
+  .slideshow-overlay p { /* Mobile adjustment for slideshow text */
+      font-size: 1rem;
   }
 
   .menu-button {
@@ -734,31 +498,11 @@ body {
 }
 
 @media (max-width: 768px) {
-    /* These styles remain largely the same or are refined for smaller mobile screens */
-    .slideshow-overlay h1 {
-        font-size: 2.5rem; /* Further adjustment for very small screens */
-    }
+    /* These global adjustments remain */
     .content-section h2 {
         font-size: 2rem;
     }
     .rsvp-form-grid {
         grid-template-columns: 1fr;
-    }
-    .gallery-page {
-        padding: 1rem;
-    }
-    .gallery-header {
-        margin-bottom: 1.5rem;
-    }
-    .gallery-header h1 {
-        font-size: 2.5rem;
-    }
-    .back-button {
-        position: static;
-        display: block;
-        margin: 0 auto 1.5rem;
-    }
-    .gallery-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     }
 }

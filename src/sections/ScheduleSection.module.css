@@ -1,0 +1,4 @@
+/* src/sections/ScheduleSection.module.css */
+/* This section primarily uses global styles from index.css for .content-section */
+/* If specific styles are needed for ScheduleSection, add them here */
+/* For now, just ensure .content-section is imported via HomePage.js global styles */

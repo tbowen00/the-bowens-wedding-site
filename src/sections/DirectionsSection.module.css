@@ -1,0 +1,13 @@
+/* src/sections/DirectionsSection.module.css */
+.map-container {
+    overflow: hidden;
+    border-radius: 8px;
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.map-container iframe {
+    width: 100%;
+    height: 100%;
+}

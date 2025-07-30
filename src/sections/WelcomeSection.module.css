@@ -1,0 +1,113 @@
+/* src/sections/WelcomeSection.module.css */
+.welcome-section {
+  min-height: 100vh;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.welcome-heading {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20vh; /* Adjust this value to move the text block down */
+}
+
+/* REMOVED: Monogram Styling
+.monogram {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  font-weight: 400;
+  color: var(--color-mocha);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+*/
+
+.welcome-heading h1 {
+  font-family: var(--font-heading);
+  font-size: 3.5rem;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 2px;
+}
+
+/* Styles for stacked date and address */
+.welcome-date, .welcome-venue, .welcome-address {
+  font-family: var(--font-body);
+  font-size: 1.2rem;
+  margin: 0.25rem 0;
+  color: var(--color-mocha);
+}
+
+.welcome-address {
+  font-size: 1.1rem;
+  color: var(--color-mocha);
+  margin-top: 1rem;
+}
+
+
+.scroll-indicator {
+  margin-top: auto;
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+  color: var(--color-mocha);
+  animation: bounce 2s infinite;
+  cursor: pointer;
+}
+
+@keyframes bounce {
+0%, 20%, 50%, 80%, 100% {
+  transform: translateY(0);
+}
+40% {
+  transform: translateY(-10px);
+}
+60% {
+  transform: translateY(-5px);
+}
+}
+
+/* Responsive adjustment for welcome section */
+@media (max-width: 1024px) {
+.welcome-section {
+  min-height: 80vh;
+  padding: 2rem 0;
+  justify-content: space-around;
+}
+.welcome-heading h1 {
+    font-size: 3.5rem;
+}
+.welcome-heading p {
+    font-size: 1rem;
+}
+/* REMOVED: Monogram mobile adjustment
+.monogram {
+    font-size: 2rem;
+}
+*/
+/* Adjust stacked text for mobile */
+.welcome-date, .welcome-venue, .welcome-address {
+  font-size: 1rem;
+}
+.welcome-heading {
+    margin-top: 15vh;
+}
+}
+
+@media (max-width: 768px) {
+  .welcome-heading h1 {
+      font-size: 2.5rem;
+  }
+  /* REMOVED: Monogram mobile adjustment
+  .monogram {
+      font-size: 1.8rem;
+  }
+  */
+}
