@@ -1,6 +1,6 @@
 // CRITICAL: This path must be correct. It goes up one level from 'functions'
 // and then down into 'utils'.
-const cloudinary = require('../utils/cloudinary');
+const cloudinary = require('./utils/cloudinary');
 
 exports.handler = async () => {
   try {
