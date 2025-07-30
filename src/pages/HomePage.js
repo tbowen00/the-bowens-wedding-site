@@ -25,7 +25,7 @@ import DirectionsSection from '../sections/DirectionsSection';
 // Import pages
 import GalleryPage from './GalleryPage/GalleryPage';
 import OverUnderGamePage from './OverUnderGamePage/OverUnderGamePage';
-import BingoGamePage from './BingoGamePage/BingoGamePage'; // CORRECTED PATH
+import BingoGamePage from './BingoGamePage/BingoGamePage';
 
 
 export default function HomePage() {
@@ -34,7 +34,8 @@ export default function HomePage() {
   const [isRsvpModalOpen, setIsRsvpModalOpen] = useState(false);
   const [isPhotoUploadModalOpen, setIsPhotoUploadModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-  const [uploadedGalleryImages, setUploadedGalleryImages] = useState([]);
+  
+  // REMOVED: The uploadedGalleryImages state is no longer needed here
   
   const mainContentRef = useRef(null);
   const sectionRefs = {
@@ -57,14 +58,8 @@ export default function HomePage() {
   const handleNavigate = (id) => {
     setIsNavOpen(false);
 
-    if (id === 'gallery') {
-      setCurrentPage('gallery');
-      return;
-    } else if (id === 'over-under') {
-      setCurrentPage('over-under');
-      return;
-    } else if (id === 'bingo') {
-      setCurrentPage('bingo');
+    if (id === 'gallery' || id === 'over-under' || id === 'bingo') {
+      setCurrentPage(id);
       return;
     }
     
@@ -88,14 +83,15 @@ export default function HomePage() {
     }
   };
 
-  const handlePhotoUploadSuccess = (imageUrls) => { // Renamed to imageUrls for clarity
-    setUploadedGalleryImages(prevImages => [...prevImages, ...imageUrls]); // Use the spread (...) operator here
-    setModalMessage('Photo uploaded successfully!');
+  // UPDATED: This function now just closes the modal and navigates to the gallery
+  const handlePhotoUploadSuccess = (imageUrls) => {
     setIsPhotoUploadModalOpen(false);
-};
+    setCurrentPage('gallery');
+  };
 
   if (currentPage === 'gallery') {
-    return <GalleryPage onBack={() => setCurrentPage('home')} uploadedImages={uploadedGalleryImages} />;
+    // UPDATED: No longer passes the uploadedImages prop
+    return <GalleryPage onBack={() => setCurrentPage('home')} />;
   } else if (currentPage === 'over-under') {
     return <OverUnderGamePage onBack={() => setCurrentPage('home')} />;
   } else if (currentPage === 'bingo') {
@@ -104,7 +100,7 @@ export default function HomePage() {
 
   return (
     <>
-      {/* Hidden form for Netlify Forms (RSVP and Games) */}
+      {/* Hidden forms for Netlify */}
       <form name="rsvp" data-netlify="true" netlify-honeypot="bot-field" hidden>
         <input type="hidden" name="form-name" value="rsvp" />
         <input type="text" name="bot-field" />
@@ -118,8 +114,7 @@ export default function HomePage() {
         <input type="text" name="bot-field" />
       </form>
 
-
-      {/* Background Audio (if enabled) */}
+      {/* Background Audio */}
       <audio ref={audioRef} autoPlay loop style={{ display: 'none' }}>
         <source src={`${process.env.PUBLIC_URL}/yoursong.mp3`} type="audio/mpeg" />
         Your browser does not support the audio element.
@@ -144,7 +139,6 @@ export default function HomePage() {
         <main className="content-column">
           <div className="content-wrapper">
             
-            {/* Render new Section Components */}
             <WelcomeSection onRsvpClick={() => setIsRsvpModalOpen(true)} onScrollToDetails={handleViewDetails} />
             <ScheduleSection sectionRef={sectionRefs.schedule} />
             <MenuSection sectionRef={sectionRefs.menu} />
@@ -170,7 +164,6 @@ export default function HomePage() {
               mapUrl="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3235.158141443653!2d-97.51900382348123!3d35.54133464010884!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x87b2183c5a61099f%3A0xb3624e5e1b2f1e2c!2sColes%20Garden!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus"
             />
             
-            {/* Footer */}
             <footer style={{textAlign: 'center', marginTop: '4rem', color: '#777'}}>
                 <p>© 2027 The Bowens. All Rights Reserved.</p>
                 <p>With love, from the future Mr. & Mrs. Bowen</p>

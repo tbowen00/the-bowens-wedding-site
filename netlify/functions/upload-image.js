@@ -19,13 +19,10 @@ exports.handler = async (event) => {
 
   let parsedBody;
   try {
-    // Netlify functions automatically parse JSON bodies.
-    // If the client sends `Content-Type: application/json`, event.body might be a stringified JSON.
-    // If event.isBase64Encoded is true, decode it first.
     if (event.isBase64Encoded) {
       parsedBody = JSON.parse(Buffer.from(event.body, 'base64').toString());
     } else {
-      parsedBody = JSON.parse(event.body); // Directly parse if not base64 encoded
+      parsedBody = JSON.parse(event.body);
     }
   } catch (error) {
     console.error("Error parsing body:", error);
@@ -35,7 +32,7 @@ exports.handler = async (event) => {
     };
   }
 
-  const fileData = parsedBody.file; // This 'file' key must match what the client sends (the base64 image string)
+  const fileData = parsedBody.file;
 
   if (!fileData) {
     return {
@@ -46,9 +43,9 @@ exports.handler = async (event) => {
 
   try {
     const uploadResult = await cloudinary.uploader.upload(fileData, {
-      // You can add options here, e.g., folder, tags, transformations
-      // folder: 'wedding_uploads',
-      resource_type: 'auto' // automatically detect image/video
+      // ADDED: This tag allows us to fetch all wedding photos later
+      tags: ['bowens_wedding_2025'],
+      resource_type: 'auto'
     });
 
     console.log('Cloudinary upload result:', uploadResult);
