@@ -88,11 +88,11 @@ export default function HomePage() {
     }
   };
 
-  const handlePhotoUploadSuccess = (imageUrl) => {
-    setUploadedGalleryImages(prevImages => [...prevImages, imageUrl]);
+  const handlePhotoUploadSuccess = (imageUrls) => { // Renamed to imageUrls for clarity
+    setUploadedGalleryImages(prevImages => [...prevImages, ...imageUrls]); // Use the spread (...) operator here
     setModalMessage('Photo uploaded successfully!');
     setIsPhotoUploadModalOpen(false);
-  };
+};
 
   if (currentPage === 'gallery') {
     return <GalleryPage onBack={() => setCurrentPage('home')} uploadedImages={uploadedGalleryImages} />;
