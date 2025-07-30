@@ -1,0 +1,12 @@
+.games-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+/* CORRECTED: Use :global() to target the global .rsvp-button-outline class */
+.games-buttons :global(.rsvp-button-outline) {
+    margin-top: 0;
+    min-width: 180px; /* Adjust this value as needed */
+}

@@ -1,12 +1,11 @@
-// src/index.js
-import React from "react";
-import ReactDOM from "react-dom/client";
-import "./index.css";
-import HomePage from "./pages/HomePage"; // Updated import path
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './styles/index.css'; // Updated path
+import App from './App'; // Render the main App component
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
+const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <HomePage /> {/* Renamed component */}
+    <App />
   </React.StrictMode>
 );

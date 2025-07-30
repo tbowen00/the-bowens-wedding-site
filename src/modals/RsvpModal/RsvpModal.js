@@ -1,6 +1,8 @@
-// src/modals/RsvpModal/RsvpModal.js
 import React, { useState, useEffect } from 'react';
+import { submitNetlifyForm } from '../../services/formService'; // Use the new form service
+import { COUPLE_NAME, VENUE_ADDRESS } from '../../data/constants'; // Use centralized constants
 
+// The state management and step logic remain the same, but the submission logic is now cleaner.
 const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
@@ -16,7 +18,7 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
     });
     const [errors, setErrors] = useState({});
 
-    // Helper to validate individual fields
+    // No changes to validation or input handling logic
     const validateField = (name, value) => {
         let error = '';
         if (name === 'firstName' && !value.trim()) error = 'First Name is required.';
@@ -27,13 +29,11 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
         }
         return error;
     };
-
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
         setErrors(prev => ({ ...prev, [name]: '' }));
     };
-
     const handleGuestInputChange = (e, index) => {
         const { name, value } = e.target;
         const newGuests = [...formData.guests];
@@ -45,12 +45,10 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
             [`guest-${index}-lastName`]: ''
         }));
     };
-
     const handleOptionSelect = (name, value) => {
         setFormData(prev => ({ ...prev, [name]: value }));
         setErrors(prev => ({ ...prev, [name]: '' }));
     };
-
     const handleEntreeCountChange = (type, increment) => {
         setFormData(prev => {
             const newCount = Math.max(0, prev.entree[type] + increment);
@@ -61,7 +59,6 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
         });
         setErrors(prev => ({ ...prev, entree: '' }));
     };
-
     const addGuest = () => {
         setFormData(prev => ({
             ...prev,
@@ -70,7 +67,6 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
         }));
         setErrors({});
     };
-
     const removeGuest = (index) => {
         if (formData.guests.length > 1) {
             setFormData(prev => {
@@ -85,15 +81,12 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
             setErrors({});
         }
     };
-
     const prevStep = () => {
         setErrors({});
         setStep(prev => prev - 1);
     };
-
     const nextStep = () => {
         let currentErrors = {};
-
         if (step === 1) {
             formData.guests.forEach((guest, index) => {
                 const firstNameError = validateField('firstName', guest.firstName);
@@ -111,7 +104,6 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
                 currentErrors.entree = 'Please select at least one entree.';
             }
         }
-
         if (Object.keys(currentErrors).length > 0) {
             setErrors(currentErrors);
             return;
@@ -119,12 +111,8 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
         setStep(prev => prev + 1);
     };
 
-    const encode = (data) => {
-        return Object.keys(data)
-            .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(data[key]))
-            .join("&");
-    };
 
+    // UPDATED: This function now uses the formService
     const handleSubmit = async () => {
         let currentErrors = {};
         if (formData.accommodations === null) currentErrors.accommodations = 'Please select if you need accommodations.';
@@ -136,38 +124,29 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
 
         onSubmit("Submitting your RSVP...");
 
-        try {
-            const dataToSubmit = {
-                "form-name": "rsvp",
-                "bot-field": "",
-                email: formData.email,
-                phone: formData.phone,
-                receiveUpdates: formData.receiveUpdates ? 'Yes' : 'No',
-                attending: formData.attending,
-                accommodations: formData.accommodations,
-                address: formData.address,
-                message: formData.message,
-                guests: formData.guests.map(g => `${g.firstName} ${g.lastName}`).join('; '),
-                entree_chicken: formData.entree.chicken,
-                entree_pasta: formData.entree.pasta,
-                entree_kids: formData.entree.kids,
-            };
+        const dataToSubmit = {
+            email: formData.email,
+            phone: formData.phone,
+            receiveUpdates: formData.receiveUpdates ? 'Yes' : 'No',
+            attending: formData.attending,
+            accommodations: formData.accommodations,
+            address: formData.address,
+            message: formData.message,
+            guests: formData.guests.map(g => `${g.firstName} ${g.lastName}`).join('; '),
+            entree_chicken: formData.entree.chicken,
+            entree_pasta: formData.entree.pasta,
+            entree_kids: formData.entree.kids,
+        };
 
-            const response = await fetch("/", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: encode(dataToSubmit)
-            });
+        // Use the abstracted service function instead of fetch
+        const result = await submitNetlifyForm('rsvp', dataToSubmit);
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
+        if (result.success) {
             console.log("RSVP Submitted:", formData);
             onSubmit(`Thank you, ${formData.guests[0].firstName}! Your RSVP has been recorded.`);
             onClose();
-        } catch (error) {
-            console.error("RSVP submission error:", error);
+        } else {
+            console.error("RSVP submission error:", result.error);
             onSubmit("There was an error submitting your RSVP. Please try again.");
         }
     };
@@ -192,14 +171,16 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
 
     if (!isOpen) return null;
 
+    // JSX is updated to use constants for the header
     return (
         <div className={`rsvp-modal ${isOpen ? 'show' : ''}`} onClick={onClose} role="dialog" aria-modal="true">
             <div className="rsvp-modal-content" onClick={e => e.stopPropagation()}>
                 <div className="rsvp-modal-header">
-                    <h2>The Bowen's</h2>
-                    <p>Oklahoma City, OK, USA</p>
+                    <h2>{COUPLE_NAME}</h2>
+                    <p>{VENUE_ADDRESS}</p>
                 </div>
-
+                
+                {/* ... all the same JSX for steps 1-4 ... */}
                 {step === 1 && (
                     <div>
                         <p>Enter guest names to RSVP</p>
@@ -248,7 +229,6 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
                         <button className="button" onClick={nextStep}>Next</button>
                     </div>
                 )}
-
                 {step === 2 && (
                     <div>
                         <div className="rsvp-form-field" style={{marginBottom: '1rem'}}>
@@ -279,9 +259,8 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
                         </div>
                     </div>
                 )}
-
                 {step === 3 && (
-                    <div>
+                     <div>
                         <div className="rsvp-question" role="radiogroup" aria-labelledby="attending-question">
                             <p id="attending-question">1. Will you be able to join us at our wedding?</p>
                             <div className="radio-group">
@@ -343,7 +322,6 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
                         </div>
                     </div>
                 )}
-
                 {step === 4 && (
                     <div>
                         <div className="rsvp-question" role="radiogroup" aria-labelledby="accommodations-question">
@@ -388,7 +366,6 @@ const RsvpModal = ({ isOpen, onClose, onSubmit }) => {
                         </div>
                     </div>
                 )}
-
                 <button className="cancel-button" onClick={onClose}>Cancel</button>
             </div>
         </div>

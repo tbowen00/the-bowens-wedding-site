@@ -1,5 +1,5 @@
-// src/pages/GalleryPage/GalleryPage.js
 import React, { useState, useEffect } from 'react';
+import { getImages } from '../../services/galleryService'; // Use the service
 import styles from './GalleryPage.module.css';
 
 const GalleryPage = ({ onBack }) => {
@@ -7,18 +7,13 @@ const GalleryPage = ({ onBack }) => {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Fetch the list of image URLs from our new function when the page loads
-        fetch('/.netlify/functions/get-images')
-            .then(res => res.json())
-            .then(data => {
-                setImages(data.urls || []);
-                setIsLoading(false);
-            })
-            .catch(error => {
-                console.error("Failed to load gallery images:", error);
-                setIsLoading(false);
-            });
-    }, []); // The empty array ensures this runs only once when the component mounts
+        const loadImages = async () => {
+            const fetchedImages = await getImages(); // Call the service
+            setImages(fetchedImages);
+            setIsLoading(false);
+        };
+        loadImages();
+    }, []);
 
     return (
         <div className={styles['gallery-page']}>
@@ -31,9 +26,10 @@ const GalleryPage = ({ onBack }) => {
                 {isLoading ? (
                     <p>Loading gallery...</p>
                 ) : (
-                    images.map((src, index) => (
-                        <div key={index} className={styles['gallery-item']}>
-                            <img src={src} alt={`Wedding gallery image ${index + 1}`} />
+                    // Use the unique 'id' for the key prop
+                    images.map((image) => (
+                        <div key={image.id} className={styles['gallery-item']}>
+                            <img src={image.url} alt={`Wedding gallery image`} />
                         </div>
                     ))
                 )}
