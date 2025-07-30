@@ -17,16 +17,20 @@ import MenuSection from '../sections/MenuSection';
 import PhotoUploadSection from '../sections/PhotoUploadSection';
 import GalleryLinkSection from '../sections/GalleryLinkSection';
 import HotelsSection from '../sections/HotelsSection';
-import GamesSection from '../sections/GamesSection';
+import GamesSection from '../sections/GamesSection'; // Import GamesSection
+
 import SpotifySection from '../sections/SpotifySection';
 import RegistrySection from '../sections/RegistrySection';
 import DirectionsSection from '../sections/DirectionsSection';
 
 // Import pages
 import GalleryPage from './GalleryPage/GalleryPage';
+import OverUnderGamePage from './OverUnderGamePage/OverUnderGamePage'; // NEW Import
+import BingoGamePage from './BingoGamePage/BingoGamePage'; // NEW Import
 
 
 export default function HomePage() {
+  // Add 'over-under' and 'bingo' to possible currentPage states
   const [currentPage, setCurrentPage] = useState('home');
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isRsvpModalOpen, setIsRsvpModalOpen] = useState(false);
@@ -37,8 +41,9 @@ export default function HomePage() {
   const mainContentRef = useRef(null);
   const sectionRefs = {
     schedule: useRef(null), menu: useRef(null), hotels: useRef(null),
-    photos: useRef(null), // Ref for photo upload section
-    games: useRef(null), spotify: useRef(null),
+    photos: useRef(null),
+    games: useRef(null), // Keep games section ref
+    spotify: useRef(null),
     registry: useRef(null), directions: useRef(null),
   };
 
@@ -55,21 +60,30 @@ export default function HomePage() {
   const handleNavigate = (id) => {
     setIsNavOpen(false);
 
+    // NEW: Handle navigation to game pages
     if (id === 'gallery') {
       setCurrentPage('gallery');
       return;
+    } else if (id === 'over-under') { // Navigate to Over/Under game page
+      setCurrentPage('over-under');
+      return;
+    } else if (id === 'bingo') { // Navigate to Bingo game page
+      setCurrentPage('bingo');
+      return;
     }
     
+    // If we are navigating to a section on the home page
     if (currentPage !== 'home') {
       setCurrentPage('home');
       setTimeout(() => {
         if (sectionRefs[id] && sectionRefs[id].current) {
-          sectionRefs[id].current.scrollIntoView({ behavior: 'smooth', block: 'start' }); // CORRECTED HERE
+          sectionRefs[id].current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       }, 0);
     } else {
+      // Already on home page, just scroll
       if (sectionRefs[id] && sectionRefs[id].current) {
-          sectionRefs[id].current.scrollIntoView({ behavior: 'smooth', block: 'start' }); // CORRECTED HERE
+          sectionRefs[id].current.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
   };
@@ -86,10 +100,16 @@ export default function HomePage() {
     setIsPhotoUploadModalOpen(false);
   };
 
+  // Conditional rendering for game pages
   if (currentPage === 'gallery') {
     return <GalleryPage onBack={() => setCurrentPage('home')} uploadedImages={uploadedGalleryImages} />;
+  } else if (currentPage === 'over-under') {
+    return <OverUnderGamePage onBack={() => setCurrentPage('home')} />; // Pass onBack prop
+  } else if (currentPage === 'bingo') {
+    return <BingoGamePage onBack={() => setCurrentPage('home')} />; // Pass onBack prop
   }
 
+  // Only render the main HomePage content if not on a game page or gallery
   return (
     <>
       {/* Hidden form for Netlify Forms detection */}
@@ -97,6 +117,17 @@ export default function HomePage() {
         <input type="hidden" name="form-name" value="rsvp" />
         <input type="text" name="bot-field" />
       </form>
+
+      {/* NEW: Hidden forms for game submissions - Netlify needs to find these in HTML */}
+      <form name="over-under-game" data-netlify="true" netlify-honeypot="bot-field" hidden>
+        <input type="hidden" name="form-name" value="over-under-game" />
+        <input type="text" name="bot-field" />
+      </form>
+      <form name="bingo-game" data-netlify="true" netlify-honeypot="bot-field" hidden>
+        <input type="hidden" name="form-name" value="bingo-game" />
+        <input type="text" name="bot-field" />
+      </form>
+
 
       {/* Background Audio (if enabled) */}
       <audio ref={audioRef} autoPlay loop style={{ display: 'none' }}>
@@ -110,7 +141,6 @@ export default function HomePage() {
         onSubmit={(message) => setModalMessage(message)}
       />
 
-      {/* Photo Upload Modal */}
       <PhotoUploadModal
         isOpen={isPhotoUploadModalOpen}
         onClose={() => setIsPhotoUploadModalOpen(false)}
@@ -135,7 +165,12 @@ export default function HomePage() {
             />
             <GalleryLinkSection onViewGallery={() => setCurrentPage('gallery')} />
             <HotelsSection sectionRef={sectionRefs.hotels} />
-            <GamesSection sectionRef={sectionRefs.games} />
+            {/* Pass handlers to GamesSection to navigate to game pages */}
+            <GamesSection
+                sectionRef={sectionRefs.games}
+                onOverUnderClick={() => handleNavigate('over-under')} // NEW prop
+                onBingoClick={() => handleNavigate('bingo')} // NEW prop
+            />
             <SpotifySection
               sectionRef={sectionRefs.spotify}
               embedUrl="https://open.spotify.com/embed/playlist/1IW9C77E5NwUXJs6o4QplP?utm_source=generator&theme=0"
@@ -148,7 +183,7 @@ export default function HomePage() {
             />
             
             <footer style={{textAlign: 'center', marginTop: '4rem', color: '#777'}}>
-                <p>© 2027 The Bowens. All Rights Reserved.</p>
+                <p>© 2027 The Bowen's. All Rights Reserved.</p>
                 <p>With love, from the future Mr. & Mrs. Bowen</p>
             </footer>
           </div>
