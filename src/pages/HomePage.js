@@ -30,12 +30,12 @@ import BingoGamePage from './BingoGamePage/BingoGamePage';
 
 export default function HomePage() {
   const [currentPage, setCurrentPage] = useState('home');
+  const previousPageRef = useRef('home');
+
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isRsvpModalOpen, setIsRsvpModalOpen] = useState(false);
   const [isPhotoUploadModalOpen, setIsPhotoUploadModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-  
-  // REMOVED: The uploadedGalleryImages state is no longer needed here
   
   const mainContentRef = useRef(null);
   const sectionRefs = {
@@ -57,6 +57,8 @@ export default function HomePage() {
 
   const handleNavigate = (id) => {
     setIsNavOpen(false);
+    
+    previousPageRef.current = currentPage;
 
     if (id === 'gallery' || id === 'over-under' || id === 'bingo') {
       setCurrentPage(id);
@@ -83,19 +85,22 @@ export default function HomePage() {
     }
   };
 
-  // UPDATED: This function now just closes the modal and navigates to the gallery
   const handlePhotoUploadSuccess = (imageUrls) => {
+    previousPageRef.current = currentPage;
     setIsPhotoUploadModalOpen(false);
     setCurrentPage('gallery');
   };
 
+  const handleBack = () => {
+    setCurrentPage(previousPageRef.current || 'home');
+  };
+
   if (currentPage === 'gallery') {
-    // UPDATED: No longer passes the uploadedImages prop
-    return <GalleryPage onBack={() => setCurrentPage('home')} />;
+    return <GalleryPage onBack={handleBack} />;
   } else if (currentPage === 'over-under') {
-    return <OverUnderGamePage onBack={() => setCurrentPage('home')} />;
+    return <OverUnderGamePage onBack={handleBack} />;
   } else if (currentPage === 'bingo') {
-    return <BingoGamePage onBack={() => setCurrentPage('home')} />;
+    return <BingoGamePage onBack={handleBack} />;
   }
 
   return (
@@ -146,7 +151,9 @@ export default function HomePage() {
                 sectionRef={sectionRefs.photos}
                 onUploadButtonClick={() => setIsPhotoUploadModalOpen(true)}
             />
-            <GalleryLinkSection onViewGallery={() => setCurrentPage('gallery')} />
+            {/* THIS IS THE CORRECTED LINE */}
+            <GalleryLinkSection onViewGallery={() => handleNavigate('gallery')} />
+
             <HotelsSection sectionRef={sectionRefs.hotels} />
             <GamesSection
                 sectionRef={sectionRefs.games}

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import styles from './OverUnderGamePage.module.css';
 
 const OverUnderGamePage = ({ onBack }) => {
-  // Define your Over/Under questions and lines
+  // Your questions and Netlify form logic are untouched.
   const questions = [
     { id: 'andyCries', question: 'How many times will Andy cry on the wedding day?', line: 5.5 },
     { id: 'brooklynHappyCries', question: 'How many times will Brooklyn happy-cry throughout the day?', line: 3.5 },
@@ -23,16 +23,15 @@ const OverUnderGamePage = ({ onBack }) => {
     { id: 'kidsQuestion', question: 'How many times will the couple be asked, “When are you having kids?”', line: 5.5 },
   ];
 
-  // Initialize formData to store 'over' or 'under' for each question
   const initialFormData = questions.reduce((acc, question) => {
-    acc[question.id] = null; // null, 'over', or 'under'
+    acc[question.id] = null;
     return acc;
   }, {});
   const [formData, setFormData] = useState(initialFormData);
   const [errors, setErrors] = useState({});
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  // This custom handleChange is needed because standard e.target.value doesn't work for our buttons
+  const handlePredictionChange = (name, value) => {
     setFormData(prev => ({ ...prev, [name]: value }));
     setErrors(prev => ({ ...prev, [name]: '' })); // Clear error when changed
   };
@@ -44,10 +43,9 @@ const OverUnderGamePage = ({ onBack }) => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault();
 
     let currentErrors = {};
-    // Validate that all questions have been answered
     questions.forEach(question => {
       if (formData[question.id] === null) {
         currentErrors[question.id] = 'Please select Over or Under.';
@@ -56,17 +54,14 @@ const OverUnderGamePage = ({ onBack }) => {
 
     if (Object.keys(currentErrors).length > 0) {
       setErrors(currentErrors);
-      alert('Please answer all questions before submitting!'); // Simple alert for now
+      alert('Please answer all questions before submitting!');
       return;
     }
 
     try {
-      // Prepare data for Netlify Forms
       const dataToSubmit = {
         "form-name": "over-under-game",
         ...formData,
-        // Optional: Add a field for who is submitting (e.g., if you add a name input later)
-        // submitterName: "Guest Name"
       };
 
       const response = await fetch("/", {
@@ -81,14 +76,21 @@ const OverUnderGamePage = ({ onBack }) => {
 
       alert('Over/Under predictions submitted successfully!');
       console.log('Over/Under Game Submitted:', formData);
-      setFormData(initialFormData); // Reset form
-      onBack(); // Go back to the home page after submission
+      setFormData(initialFormData);
+      onBack();
 
     } catch (error) {
       console.error('Submission error:', error);
       alert('There was an error submitting your game. Please try again.');
     }
   };
+
+  // A small checkmark icon component
+  const CheckIcon = () => (
+    <svg className={styles['check-icon']} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+      <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.052-.143z" clipRule="evenodd" />
+    </svg>
+  );
 
   return (
     <div className={styles['game-page']}>
@@ -98,11 +100,8 @@ const OverUnderGamePage = ({ onBack }) => {
         <p>Make your predictions!</p>
       </div>
       
-      {/* The actual form for Netlify to detect */}
       <form name="over-under-game" method="POST" data-netlify="true" onSubmit={handleSubmit}>
         <input type="hidden" name="form-name" value="over-under-game" />
-        {/* Hidden field for honeypot if you want to add it here too */}
-        {/* <input type="text" name="bot-field" style={{ display: 'none' }} /> */}
         
         <div className={styles['game-content']}>
           {questions.map((q) => (
@@ -113,30 +112,28 @@ const OverUnderGamePage = ({ onBack }) => {
               </div>
               <div className={styles['prediction-buttons']}>
                 <button
-                  type="button" // Important: type="button" to prevent accidental form submission
-                  name={q.id}
-                  value="over"
-                  onClick={handleChange}
+                  type="button"
+                  onClick={() => handlePredictionChange(q.id, 'over')}
                   className={`${styles['prediction-button']} ${formData[q.id] === 'over' ? styles['selected'] : ''}`}
                 >
+                  {formData[q.id] === 'over' && <CheckIcon />}
                   Over
                 </button>
                 <button
                   type="button"
-                  name={q.id}
-                  value="under"
-                  onClick={handleChange}
+                  onClick={() => handlePredictionChange(q.id, 'under')}
                   className={`${styles['prediction-button']} ${formData[q.id] === 'under' ? styles['selected'] : ''}`}
                 >
+                  {formData[q.id] === 'under' && <CheckIcon />}
                   Under
                 </button>
               </div>
-              {errors[q.id] && <p className="error-message">{errors[q.id]}</p>}
+              {errors[q.id] && <p className={styles['error-message']}>{errors[q.id]}</p>}
             </div>
           ))}
         </div>
 
-        <button type="submit" className={`button ${styles['submit-button']}`}>Submit Predictions</button>
+        <button type="submit" className={styles['submit-button']}>Submit Predictions</button>
       </form>
     </div>
   );

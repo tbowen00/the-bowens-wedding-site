@@ -1,164 +1,184 @@
 /* src/pages/OverUnderGamePage/OverUnderGamePage.module.css */
+
 .game-page {
     padding: 2rem;
     max-width: 800px;
     margin: 0 auto;
     text-align: center;
-    background-color: var(--color-white); /* Example: white background for page */
-    min-height: 100vh; /* Ensure it takes full height */
-  }
-  
-  .game-header {
-    margin-bottom: 2rem;
+    background-color: #f9f9f9; /* Softer background */
+    min-height: 100vh;
+}
+
+.game-header {
+    margin-bottom: 2.5rem;
     position: relative;
     text-align: center;
-  }
-  
-  .game-header h1 {
+}
+
+.game-header h1 {
     font-family: var(--font-heading);
-    font-size: 3rem;
+    font-size: 3.5rem;
     color: var(--color-mocha);
     margin-bottom: 0.5rem;
-  }
-  
-  .game-header p {
-    font-size: 1.1rem;
-    color: #666;
-  }
-  
-  .back-button {
+}
+
+.game-header p {
+    font-size: 1.2rem;
+    color: #555;
+}
+
+.back-button {
     position: absolute;
-    top: 0;
-    left: 0;
-    background: none;
-    border: 1px solid #ddd;
+    top: 1rem; /* Adjust positioning slightly */
+    left: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* Space between icon and text */
+    background-color: var(--color-white);
     color: var(--color-dark-grey);
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
+    border: none; /* Remove the old border */
+    padding: 0.6rem 1.2rem;
+    border-radius: 50px; /* Pill shape */
     cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
   }
   
   .back-button:hover {
-    background-color: var(--color-light-grey);
-    border-color: #ccc;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
   }
-  
-  .game-content {
+
+.game-content {
     margin-top: 2rem;
-    padding: 1.5rem;
-    border: 1px solid #eee;
-    border-radius: 8px;
-    background-color: #f8f8f8;
     display: flex;
     flex-direction: column;
-    gap: 1.5rem; /* Increased gap between questions */
-    align-items: center; /* Center items within the content box */
-  }
-  
-  .question-item {
-    display: flex;
-    flex-direction: column;
+    gap: 1.5rem; /* This will be the space between our new cards */
     align-items: center;
+}
+
+/* NEW CARD DESIGN FOR EACH QUESTION */
+.question-item {
+    background-color: var(--color-white);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+    padding: 1.5rem 2rem;
     width: 100%;
-    padding-bottom: 1rem;
-    border-bottom: 1px dashed #ddd; /* Separator for questions */
-  }
-  
-  .question-item:last-child {
-    border-bottom: none; /* No border for the last question */
-  }
-  
-  .question-text {
-    font-size: 1.1rem;
-    color: var(--color-dark-grey);
-    font-weight: 500;
-    margin-bottom: 0.5rem;
+    max-width: 600px; /* Constrain card width */
     text-align: center;
-  }
-  
-  .line-container {
+    transition: transform 0.2s ease-in-out;
+}
+
+.question-item:hover {
+    transform: translateY(-4px);
+}
+
+.question-text {
+    font-size: 1.25rem;
+    color: #333;
+    font-weight: 600;
+    line-height: 1.5;
+    margin: 0 0 1rem 0; /* Adjusted margin */
+}
+
+.line-container {
+    display: inline-block;
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--color-mocha);
+    padding: 0.4rem 1rem;
+    border-radius: 20px; /* Pill shape */
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.prediction-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.prediction-button {
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+    color: var(--color-dark-grey);
+    padding: 0.8rem 2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-grow: 1; /* Make buttons take equal space */
+    max-width: 180px;
+}
+
+.prediction-button:not(.selected):hover {
+    background-color: #e9e9e9;
+    border-color: #ccc;
+}
+
+.prediction-button.selected {
     background-color: var(--color-mocha);
     color: var(--color-white);
-    padding: 0.3rem 0.8rem;
-    border-radius: 5px;
-    font-weight: bold;
-    font-size: 1rem;
-    margin-bottom: 1rem;
-  }
-  
-  .prediction-buttons {
-    display: flex;
-    gap: 0.8rem; /* Space between Over and Under buttons */
-    justify-content: center;
-  }
-  
-  .prediction-button {
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    color: var(--color-dark-grey);
-    padding: 0.6rem 1.5rem;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 1rem;
-    font-weight: 500;
-  }
-  
-  .prediction-button:hover {
-    background-color: #e0e0e0;
-    border-color: #bbb;
-  }
-  
-  .prediction-button.selected {
-    background-color: var(--color-mocha); /* Selected state color */
-    color: var(--color-white);
     border-color: var(--color-mocha);
-  }
-  
-  .submit-button {
-    margin-top: 2rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.check-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.submit-button {
+    margin-top: 3rem;
     background-color: var(--color-mocha);
     color: var(--color-white);
     border: none;
-    padding: 0.8rem 2rem;
-    font-size: 1.1rem;
+    padding: 1rem 3rem;
+    font-size: 1.2rem;
+    font-weight: bold;
     font-family: var(--font-body);
     cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-    width: auto;
-  }
-  
-  .submit-button:hover {
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.submit-button:hover {
     background-color: var(--color-black);
-  }
-  
-  /* Error message styling (reusing global error-message class if present in index.css) */
-  /* .error-message is assumed to be global and defined in index.css */
-  
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.error-message {
+    color: #d9534f;
+    font-size: 0.9rem;
+    margin-top: 0.75rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
     .game-page {
-      padding: 1rem;
+        padding: 1.5rem 1rem;
     }
     .game-header h1 {
-      font-size: 2.5rem;
+        font-size: 2.8rem;
     }
     .back-button {
-      position: static;
-      display: block;
-      margin: 0 auto 1.5rem;
+        position: static;
+        display: block;
+        margin: 0 auto 2rem;
     }
-    .question-text {
-      font-size: 1rem;
+    .question-item {
+        padding: 1.5rem;
     }
-    .prediction-buttons {
-      flex-direction: column; /* Stack buttons on small screens */
-      gap: 0.5rem;
-    }
-    .prediction-button {
-      width: 100%;
-      max-width: 200px; /* Constrain width when stacked */
-    }
-  }
+}

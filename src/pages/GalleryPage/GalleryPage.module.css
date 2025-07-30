@@ -26,20 +26,27 @@
 
 .back-button {
   position: absolute;
-  top: 0;
-  left: 0;
-  background: none;
-  border: 1px solid #ddd;
+  top: 1rem; /* Adjust positioning slightly */
+  left: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Space between icon and text */
+  background-color: var(--color-white);
   color: var(--color-dark-grey);
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
+  border: none; /* Remove the old border */
+  padding: 0.6rem 1.2rem;
+  border-radius: 50px; /* Pill shape */
   cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
 }
 
 .back-button:hover {
-  background-color: var(--color-light-grey);
-  border-color: #ccc;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
 }
 
 .gallery-grid {
