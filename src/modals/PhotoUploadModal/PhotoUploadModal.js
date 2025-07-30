@@ -2,169 +2,223 @@
 import React, { useState } from 'react';
 import styles from './PhotoUploadModal.module.css';
 
-const PhotoUploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [previewUrl, setPreviewUrl] = useState('');
-    const [isUploading, setIsUploading] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState(0); // For progress bar
-    const [uploadError, setUploadError] = useState('');
-    const [uploadSuccess, setUploadSuccess] = useState(false);
+// A helper function to format file size
+const formatBytes = (bytes, decimals = 1) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+};
 
-    // CLOUDINARY_CLOUD_NAME and CLOUDINARY_UPLOAD_PRESET are NOT needed here anymore
-    // as the Netlify Function handles the Cloudinary interaction
+const PhotoUploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [uploadStates, setUploadStates] = useState({});
+    const [isUploadingAll, setIsUploadingAll] = useState(false);
+    const [overallError, setOverallError] = useState('');
+    const [isSubmitted, setIsSubmitted] = useState(false);
+
+    const addFiles = (newFiles) => {
+        const validFiles = Array.from(newFiles).filter(file => file.type.startsWith('image/'));
+        setSelectedFiles(prevFiles => {
+            const updatedFiles = [...prevFiles];
+            validFiles.forEach(newFile => {
+                if (!updatedFiles.some(existingFile => existingFile.name === newFile.name && existingFile.size === newFile.size)) {
+                    updatedFiles.push(newFile);
+                }
+            });
+            return updatedFiles;
+        });
+        setUploadStates(prevStates => {
+            const newUploadStates = { ...prevStates };
+            validFiles.forEach(file => {
+                if (!newUploadStates[file.name]) {
+                    newUploadStates[file.name] = { progress: 0, error: '', success: false, url: '' };
+                }
+            });
+            return newUploadStates;
+        });
+        setOverallError('');
+        setIsSubmitted(false);
+    };
 
     const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            setSelectedFile(file);
-            setPreviewUrl(URL.createObjectURL(file)); // Create a local URL for image preview
-            setUploadProgress(0); // Reset progress
-            setUploadError(''); // Clear previous errors
-            setUploadSuccess(false); // Reset success state
-        } else {
-            setSelectedFile(null);
-            setPreviewUrl('');
-        }
+        if (event.target.files) addFiles(event.target.files);
+        event.target.value = null;
     };
 
     const handleDrop = (event) => {
         event.preventDefault();
-        const file = event.dataTransfer.files[0];
-        if (file) {
-            setSelectedFile(file);
-            setPreviewUrl(URL.createObjectURL(file));
-            setUploadProgress(0);
-            setUploadError('');
-            setUploadSuccess(false);
-        }
+        event.currentTarget.classList.remove(styles['drag-over']);
+        addFiles(event.dataTransfer.files);
     };
 
     const handleDragOver = (event) => {
-        event.preventDefault(); // Necessary to allow drop
+        event.preventDefault();
+        event.currentTarget.classList.add(styles['drag-over']);
     };
 
-    const handleUpload = async () => {
-        if (!selectedFile) {
-            setUploadError('Please select a file to upload.');
+    const handleDragLeave = (event) => {
+        event.currentTarget.classList.remove(styles['drag-over']);
+    };
+
+    const removeFile = (fileNameToRemove) => {
+        setSelectedFiles(prev => prev.filter(file => file.name !== fileNameToRemove));
+        setUploadStates(prev => {
+            const newStates = { ...prev };
+            delete newStates[fileNameToRemove];
+            return newStates;
+        });
+        setOverallError('');
+    };
+
+    const handleUploadAll = async () => {
+        if (selectedFiles.length === 0) {
+            setOverallError('Please select at least one file to upload.');
             return;
         }
 
-        setIsUploading(true);
-        setUploadProgress(0); // Start progress from 0
-        setUploadError('');
-        setUploadSuccess(false);
+        setIsUploadingAll(true);
+        setOverallError('');
+        const uploadedUrls = [];
+        let hasError = false;
 
-        // Convert file to base64 for sending to Netlify Function
-        const reader = new FileReader();
-        reader.readAsDataURL(selectedFile); // Reads the file as a data URL (base64)
-        reader.onloadend = async () => {
-            const base64data = reader.result; // This is the base64 string
-
-            try {
-                // Send base64 data to Netlify Function endpoint
-                const response = await fetch('/.netlify/functions/upload-image', { // NEW ENDPOINT
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json', // We are sending JSON
-                    },
-                    body: JSON.stringify({ file: base64data }), // Send base64 string in the 'file' key
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Image upload failed.');
-                }
-
-                const data = await response.json();
-                console.log('Uploaded image data:', data);
-                setUploadProgress(100); // Set to 100% on success
-                setUploadSuccess(true); // Mark as successful
-                setIsUploading(false); // Stop uploading state
-
-                onUploadSuccess(data.secure_url); // Callback to parent to add image to gallery
-
-            } catch (error) {
-                console.error('Error uploading image:', error);
-                setUploadError(error.message || 'Failed to upload image. Please try again.');
-                setIsUploading(false);
-                setUploadProgress(0); // Reset progress on error
+        for (const file of selectedFiles) {
+            if (uploadStates[file.name]?.success && uploadStates[file.name]?.url) {
+                uploadedUrls.push(uploadStates[file.name].url);
+                continue;
             }
-        };
-        reader.onerror = () => {
-            setUploadError('Failed to read file.');
-            setIsUploading(false);
-            setUploadProgress(0);
-        };
+
+            setUploadStates(prev => ({ ...prev, [file.name]: { ...prev[file.name], progress: 1, error: '', success: false } }));
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+
+            await new Promise(resolve => {
+                reader.onloadend = async () => {
+                    const base64data = reader.result;
+                    try {
+                        const response = await fetch('/.netlify/functions/upload-image', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ file: base64data }),
+                        });
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Upload failed.');
+                        }
+                        const data = await response.json();
+                        uploadedUrls.push(data.secure_url);
+                        setUploadStates(prev => ({ ...prev, [file.name]: { ...prev[file.name], progress: 100, success: true, url: data.secure_url } }));
+                    } catch (error) {
+                        setUploadStates(prev => ({ ...prev, [file.name]: { ...prev[file.name], error: error.message || 'Failed', success: false } }));
+                        hasError = true;
+                    } finally {
+                        resolve();
+                    }
+                };
+                reader.onerror = () => {
+                    setUploadStates(prev => ({ ...prev, [file.name]: { ...prev[file.name], error: 'Failed to read file.', success: false } }));
+                    hasError = true;
+                    resolve();
+                };
+            });
+        }
+
+        setIsUploadingAll(false);
+
+        if (!hasError) {
+            onUploadSuccess(uploadedUrls);
+            setIsSubmitted(true);
+        } else {
+            setOverallError('Some photos failed to upload. Please review errors above.');
+        }
     };
 
-    const handleSubmit = () => {
+    const handleCloseModal = () => {
+        setSelectedFiles([]);
+        setUploadStates({});
+        setIsSubmitted(false);
+        setOverallError('');
         onClose();
     };
 
     if (!isOpen) return null;
 
     return (
-        <div className={`simple-modal ${isOpen ? 'show' : ''}`} onClick={onClose} role="dialog" aria-modal="true">
-            {/* The main modal content container */}
+        <div className={`simple-modal ${isOpen ? 'show' : ''}`} onClick={handleCloseModal} role="dialog" aria-modal="true">
             <div className={`simple-modal-content ${styles['photo-upload-modal-content']}`} onClick={e => e.stopPropagation()}>
-                <button className={styles['close-button']} onClick={onClose} disabled={isUploading}>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                        <path fillRule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clipRule="evenodd" />
-                    </svg>
+                <button className={styles['close-button']} onClick={handleCloseModal} disabled={isUploadingAll} aria-label="Close modal">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" /></svg>
                 </button>
 
                 <h2 className={styles['modal-title']}>Upload and attach files</h2>
-                <p className={styles['modal-subtitle']}>Upload and attach files to this project.</p>
+                <p className={styles['modal-subtitle']}>Upload images to the project gallery.</p>
 
-                <div
-                    className={`${styles['upload-box']} ${selectedFile ? styles['has-file'] : ''}`}
-                    onDrop={handleDrop}
-                    onDragOver={handleDragOver}
-                >
-                    {!selectedFile ? (
-                        <>
-                            <img src={`${process.env.PUBLIC_URL}/assets/images/cloud-computing.png`} alt="Upload Cloud Icon" className={styles['cloud-upload-icon']} />
-                            <label htmlFor="photo-upload-input" className={styles['upload-text-prompt']}>
-                                Click to upload or drag and drop
-                            </label>
-                            <span className={styles['upload-hint']}>SVG, PNG, JPG or GIF (max. file size, consider adding limits)</span>
-                            <input
-                                type="file"
-                                accept="image/svg+xml,image/png,image/jpeg,image/gif"
-                                onChange={handleFileChange}
-                                className={styles['file-input']}
-                                id="photo-upload-input"
-                            />
-                        </>
-                    ) : (
-                        <div className={styles['file-preview-item']}>
-                            <div className={styles['file-thumbnail']}>
-                                {previewUrl && <img src={previewUrl} alt="Selected preview" className={styles['thumbnail-image']} />}
-                            </div>
-                            <div className={styles['file-details']}>
-                                <p className={styles['file-name']}>{selectedFile.name}</p>
-                                <p className={styles['file-size']}>{Math.round(selectedFile.size / 1024)} KB</p>
-
-                                {isUploading && (
-                                    <div className={styles['progress-wrapper']}>
-                                        <div className={styles['progress-bar']} style={{ width: `${uploadProgress}%` }}></div>
-                                    </div>
-                                )}
-                                {uploadSuccess && <span className={styles['upload-status']}><svg viewBox="0 0 24 24" fill="currentColor" className={styles['success-icon']}><path fillRule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-3-3a.75.75 0 011.06-1.06l2.769 2.769 8.792-13.188a.75.75 0 011.04-.208z" clipRule="evenodd" /></svg> Uploaded</span>}
-                                {uploadError && <p className={styles['error-message']}>{uploadError}</p>}
-                            </div>
-                        </div>
-                    )}
+                <div className={`${styles['upload-box']}`} onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}>
+                    <img src={`${process.env.PUBLIC_URL}/assets/images/cloud-computing.png`} alt="Upload Cloud Icon" className={styles['cloud-upload-icon']} />
+                    <p className={styles['upload-text-container']}>
+                        <label htmlFor="photo-upload-input" className={styles['upload-clickable-text']}>Click to upload</label>
+                        <span className={styles['upload-static-text']}> or drag and drop</span>
+                    </p>
+                    <span className={styles['upload-hint']}>SVG, PNG, JPG or GIF</span>
+                    <input type="file" accept="image/*" onChange={handleFileChange} className={styles['file-input']} id="photo-upload-input" multiple />
                 </div>
 
+                {selectedFiles.length > 0 && (
+                    <div className={styles['file-list-container']}>
+                        {selectedFiles.map((file) => {
+                            const state = uploadStates[file.name] || {};
+                            const isUploadingThisFile = isUploadingAll && !state.success && !state.error;
+                            const isWaiting = !isUploadingAll && !state.success && !state.error;
+
+                            return (
+                                <div key={file.name} className={styles['file-preview-item']}>
+                                    <div className={styles['file-info']}>
+                                        <div className={styles['file-icon']}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                                <path fillRule="evenodd" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.122 2.122l7.81-7.81" />
+                                            </svg>
+                                        </div>
+                                        <span className={styles['file-name']}>{file.name}</span>
+                                    </div>
+
+                                    <div className={styles['file-actions']}>
+                                        <div className={styles['file-status']}>
+                                            {isWaiting && <span className={styles['file-size']}>{formatBytes(file.size)}</span>}
+                                            {isUploadingThisFile && <div className={styles['progress-spinner']}></div>}
+                                            {state.success && <div className={styles['success-icon']}></div>}
+                                            {state.error && <div className={styles['error-icon']}></div>}
+                                        </div>
+                                        {!isUploadingAll && (
+                                            <button className={styles['remove-file-button']} onClick={() => removeFile(file.name)} aria-label={`Remove ${file.name}`}>
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"><path d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z" /></svg>
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+
+                {overallError && <p className={styles['overall-error-message']}>{overallError}</p>}
+
                 <div className={styles['button-row']}>
-                    <button
-                        className={`button ${styles['upload-button']}`}
-                        onClick={handleUpload}
-                        disabled={isUploading || uploadSuccess || !selectedFile}
-                    >
-                        {isUploading ? 'Uploading...' : (uploadSuccess ? 'Uploaded!' : 'Upload Photo')}
-                    </button>
+                    {isSubmitted && !overallError.includes('failed') ? (
+                        <p className={styles['submission-success-message']}>
+                            All photos uploaded to the <button onClick={handleCloseModal} className={styles['gallery-link']}>gallery</button>!
+                        </p>
+                    ) : (
+                        <button
+                            className={styles.button}
+                            onClick={handleUploadAll}
+                            disabled={selectedFiles.length === 0 || isUploadingAll}
+                        >
+                            {isUploadingAll ? 'Uploading...' : 'Submit'}
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
