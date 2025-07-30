@@ -6,35 +6,53 @@ const PhotoUploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
     const [isUploading, setIsUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
     const [uploadError, setUploadError] = useState('');
+    const [uploadSuccess, setUploadSuccess] = useState(false);
 
-    // --- REPLACE THESE WITH YOUR ACTUAL CLOUDINARY CREDENTIALS ---
-    // Use your Cloud Name
-    const CLOUDINARY_CLOUD_NAME = 'dtmhmxqiw'; // <--- UPDATED
-    // Use the exact name of your UNSIGNED upload preset from Cloudinary Settings -> Upload -> Upload presets
-    const CLOUDINARY_UPLOAD_PRESET = 'wedding_upload_preset'; // <--- YOU STILL NEED TO REPLACE THIS with the name you chose in Cloudinary!
-    // -----------------------------------------------------------
+    const CLOUDINARY_CLOUD_NAME = 'dtmhmxqiw';
+    const CLOUDINARY_UPLOAD_PRESET = 'wedding_upload_preset';
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         if (file) {
             setSelectedFile(file);
             setPreviewUrl(URL.createObjectURL(file));
+            setUploadProgress(0);
             setUploadError('');
+            setUploadSuccess(false);
         } else {
             setSelectedFile(null);
             setPreviewUrl('');
         }
     };
 
+    const handleDrop = (event) => {
+        event.preventDefault();
+        const file = event.dataTransfer.files[0];
+        if (file) {
+            setSelectedFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
+            setUploadProgress(0);
+            setUploadError('');
+            setUploadSuccess(false);
+        }
+    };
+
+    const handleDragOver = (event) => {
+        event.preventDefault();
+    };
+
     const handleUpload = async () => {
         if (!selectedFile) {
-            setUploadError('Please select a file first.');
+            setUploadError('Please select a file to upload.');
             return;
         }
 
         setIsUploading(true);
+        setUploadProgress(0);
         setUploadError('');
+        setUploadSuccess(false);
 
         const formData = new FormData();
         formData.append('file', selectedFile);
@@ -42,7 +60,7 @@ const PhotoUploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
 
         try {
             const response = await fetch(
-                `http://googleusercontent.com/api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+                `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
                 {
                     method: 'POST',
                     body: formData,
@@ -56,19 +74,22 @@ const PhotoUploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
 
             const data = await response.json();
             console.log('Uploaded image data:', data);
-            
+            setUploadProgress(100);
+            setUploadSuccess(true);
+            setIsUploading(false);
+
             onUploadSuccess(data.secure_url);
-            
-            setSelectedFile(null);
-            setPreviewUrl('');
-            onClose();
 
         } catch (error) {
             console.error('Error uploading image:', error);
             setUploadError(error.message || 'Failed to upload image. Please try again.');
-        } finally {
             setIsUploading(false);
+            setUploadProgress(0);
         }
+    };
+
+    const handleSubmit = () => {
+        onClose();
     };
 
     if (!isOpen) return null;
@@ -76,36 +97,66 @@ const PhotoUploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
     return (
         <div className={`simple-modal ${isOpen ? 'show' : ''}`} onClick={onClose} role="dialog" aria-modal="true">
             <div className={`simple-modal-content ${styles['photo-upload-modal-content']}`} onClick={e => e.stopPropagation()}>
-                <h2 className="rsvp-modal-header">Upload Your Photos</h2>
-                <p>Share your favorite moments from our special day!</p>
-                
-                {previewUrl && (
-                    <div className={styles['image-preview-container']}>
-                        <img src={previewUrl} alt="Selected preview" className={styles['image-preview']} />
-                    </div>
-                )}
-
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className={styles['file-input']}
-                    id="photo-upload-input"
-                />
-                <label htmlFor="photo-upload-input" className={styles['file-input-label']}>
-                    {selectedFile ? selectedFile.name : 'Choose Photo'}
-                </label>
-
-                {uploadError && <p className={styles['error-message']}>{uploadError}</p>}
-
-                <button
-                    className={`button ${styles['upload-button']}`}
-                    onClick={handleUpload}
-                    disabled={!selectedFile || isUploading}
-                >
-                    {isUploading ? 'Uploading...' : 'Upload Photo'}
+                <button className={styles['close-button']} onClick={onClose} disabled={isUploading}>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                        <path fillRule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clipRule="evenodd" />
+                    </svg>
                 </button>
-                <button className="cancel-button" onClick={onClose} disabled={isUploading}>Cancel</button>
+
+                <h2 className={styles['modal-title']}>Upload and attach files</h2>
+                <p className={styles['modal-subtitle']}>Upload and attach files to this project.</p>
+
+                <div
+                    className={`${styles['upload-box']} ${selectedFile ? styles['has-file'] : ''}`}
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                >
+                    {!selectedFile ? (
+                        <>
+                            {/* REPLACED SVG WITH IMG TAG */}
+                            <img src={`${process.env.PUBLIC_URL}/assets/images/cloud-computing.png`} alt="Upload Cloud Icon" className={styles['cloud-upload-icon']} />
+                            <label htmlFor="photo-upload-input" className={styles['upload-text-prompt']}>
+                                Click to upload or drag and drop
+                            </label>
+                            <span className={styles['upload-hint']}>SVG, PNG, JPG or GIF (max. file size, consider adding limits)</span>
+                            <input
+                                type="file"
+                                accept="image/svg+xml,image/png,image/jpeg,image/gif"
+                                onChange={handleFileChange}
+                                className={styles['file-input']}
+                                id="photo-upload-input"
+                            />
+                        </>
+                    ) : (
+                        <div className={styles['file-preview-item']}>
+                            <div className={styles['file-thumbnail']}>
+                                {previewUrl && <img src={previewUrl} alt="Selected preview" className={styles['thumbnail-image']} />}
+                            </div>
+                            <div className={styles['file-details']}>
+                                <p className={styles['file-name']}>{selectedFile.name}</p>
+                                <p className={styles['file-size']}>{Math.round(selectedFile.size / 1024)} KB</p>
+                                
+                                {isUploading && (
+                                    <div className={styles['progress-wrapper']}>
+                                        <div className={styles['progress-bar']} style={{ width: `${uploadProgress}%` }}></div>
+                                    </div>
+                                )}
+                                {uploadSuccess && <span className={styles['upload-status']}><svg viewBox="0 0 24 24" fill="currentColor" className={styles['success-icon']}><path fillRule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-3-3a.75.75 0 011.06-1.06l2.769 2.769 8.792-13.188a.75.75 0 011.04-.208z" clipRule="evenodd" /></svg> Uploaded</span>}
+                                {uploadError && <p className={styles['error-message']}>{uploadError}</p>}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className={styles['button-row']}>
+                    <button
+                        className={`button ${styles['upload-button']}`}
+                        onClick={handleUpload}
+                        disabled={isUploading || uploadSuccess || !selectedFile}
+                    >
+                        {isUploading ? 'Uploading...' : (uploadSuccess ? 'Uploaded!' : 'Upload Photo')}
+                    </button>
+                </div>
             </div>
         </div>
     );

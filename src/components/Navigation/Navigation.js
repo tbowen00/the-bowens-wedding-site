@@ -1,12 +1,13 @@
+// src/components/Navigation/Navigation.js
 import React from 'react';
 
 const Navigation = ({ onNavigate, isNavOpen, setIsNavOpen }) => {
   const sections = [
     { id: 'schedule', title: 'Schedule' },
     { id: 'menu', title: 'Menu' },
-    { id: 'hotels', title: 'Hotels' },
     { id: 'photos', title: 'Photos' },
     { id: 'gallery', title: 'Gallery' },
+    { id: 'hotels', title: 'Hotels' }, // MOVED: Now under Gallery
     { id: 'games', title: 'Games' },
     { id: 'spotify', title: 'Playlist' },
     { id: 'registry', title: 'Registry' },

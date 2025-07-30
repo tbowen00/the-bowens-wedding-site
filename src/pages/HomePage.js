@@ -8,7 +8,7 @@ import Modal from '../components/Modal/Modal';
 
 // Import modals
 import RsvpModal from '../modals/RsvpModal/RsvpModal';
-import PhotoUploadModal from '../modals/PhotoUploadModal/PhotoUploadModal'; // NEW Import
+import PhotoUploadModal from '../modals/PhotoUploadModal/PhotoUploadModal';
 
 // Import sections
 import WelcomeSection from '../sections/WelcomeSection';
@@ -30,9 +30,9 @@ export default function HomePage() {
   const [currentPage, setCurrentPage] = useState('home');
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isRsvpModalOpen, setIsRsvpModalOpen] = useState(false);
-  const [isPhotoUploadModalOpen, setIsPhotoUploadModalOpen] = useState(false); // NEW State for photo upload modal
+  const [isPhotoUploadModalOpen, setIsPhotoUploadModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-  const [uploadedGalleryImages, setUploadedGalleryImages] = useState([]); // NEW State for dynamically uploaded images
+  const [uploadedGalleryImages, setUploadedGalleryImages] = useState([]);
   
   const mainContentRef = useRef(null);
   const sectionRefs = {
@@ -64,12 +64,12 @@ export default function HomePage() {
       setCurrentPage('home');
       setTimeout(() => {
         if (sectionRefs[id] && sectionRefs[id].current) {
-          sectionRefs[id].current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          sectionRefs[id].current.scrollIntoView({ behavior: 'smooth', block: 'start' }); // CORRECTED HERE
         }
       }, 0);
     } else {
       if (sectionRefs[id] && sectionRefs[id].current) {
-          sectionRefs[id].current.scrollInView({ behavior: 'smooth', block: 'start' });
+          sectionRefs[id].current.scrollIntoView({ behavior: 'smooth', block: 'start' }); // CORRECTED HERE
       }
     }
   };
@@ -80,15 +80,13 @@ export default function HomePage() {
     }
   };
 
-  // NEW: Function to handle successful photo upload
   const handlePhotoUploadSuccess = (imageUrl) => {
     setUploadedGalleryImages(prevImages => [...prevImages, imageUrl]);
     setModalMessage('Photo uploaded successfully!');
-    setIsPhotoUploadModalOpen(false); // Close the modal after upload
+    setIsPhotoUploadModalOpen(false);
   };
 
   if (currentPage === 'gallery') {
-    // Pass uploaded images to GalleryPage
     return <GalleryPage onBack={() => setCurrentPage('home')} uploadedImages={uploadedGalleryImages} />;
   }
 
@@ -112,7 +110,7 @@ export default function HomePage() {
         onSubmit={(message) => setModalMessage(message)}
       />
 
-      {/* NEW Photo Upload Modal */}
+      {/* Photo Upload Modal */}
       <PhotoUploadModal
         isOpen={isPhotoUploadModalOpen}
         onClose={() => setIsPhotoUploadModalOpen(false)}
@@ -131,10 +129,9 @@ export default function HomePage() {
             <WelcomeSection onRsvpClick={() => setIsRsvpModalOpen(true)} onScrollToDetails={handleViewDetails} />
             <ScheduleSection sectionRef={sectionRefs.schedule} />
             <MenuSection sectionRef={sectionRefs.menu} />
-            {/* Pass prop to open photo upload modal */}
             <PhotoUploadSection
                 sectionRef={sectionRefs.photos}
-                onUploadButtonClick={() => setIsPhotoUploadModalOpen(true)} // NEW Prop
+                onUploadButtonClick={() => setIsPhotoUploadModalOpen(true)}
             />
             <GalleryLinkSection onViewGallery={() => setCurrentPage('gallery')} />
             <HotelsSection sectionRef={sectionRefs.hotels} />
@@ -151,7 +148,7 @@ export default function HomePage() {
             />
             
             <footer style={{textAlign: 'center', marginTop: '4rem', color: '#777'}}>
-                <p>© 2027 The Bowen's. All Rights Reserved.</p>
+                <p>© 2027 The Bowens. All Rights Reserved.</p>
                 <p>With love, from the future Mr. & Mrs. Bowen</p>
             </footer>
           </div>
